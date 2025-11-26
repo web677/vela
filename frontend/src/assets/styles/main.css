@@ -77,6 +77,12 @@
   overflow-x: hidden;
 }
 
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 /* ===================================
    通用样式类
    =================================== */
