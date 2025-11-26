@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>阿里云验证码测试</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 400px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    .form-group {
+      margin: 20px 0;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #347eff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:disabled {
+      background: #ccc;
+    }
+    #captcha {
+      height: 0;
+    }
+  </style>
+</head>
+<body>
+  <h2>验证码测试</h2>
+  
+  <div class="form-group">
+    <label>手机号</label>
+    <input type="tel" id="phone" placeholder="请输入手机号" maxlength="11">
+  </div>
+
+  <div id="captcha"></div>
+
+  <button id="getCodeBtn">获取验证码</button>
+
+  <div class="form-group">
+    <label>短信验证码</label>
+    <input type="text" id="code" placeholder="请输入验证码" maxlength="6">
+  </div>
+
+  <button id="loginBtn">登录</button>
+
+  <script src="/ct4.js"></script>
+  <script>
+    // 替换为你的实际captchaId
+    const CAPTCHA_ID = '34d897c1a93c9c104786cda3ac94b71c';
+
+    let captchaObj = null;
+
+    // 初始化验证码
+    console.log('开始初始化验证码...');
+    
+    initAlicom4({
+      captchaId: CAPTCHA_ID,
+      product: 'bind',
+      protocol: 'https://'
+    }, function(captcha) {
+      console.log('验证码回调触发');
+      
+      captchaObj = captcha;
+      window.captchaObj = captcha; // 方便调试
+
+      // 挂载到容器
+      captcha.appendTo('#captcha');
+      console.log('已appendTo #captcha');
+
+      captcha.onReady(function() {
+        console.log('✅ 验证码ready');
+      });
+
+      captcha.onNextReady(function() {
+        console.log('✅ Next ready');
+      });
+
+      captcha.onBoxShow(function() {
+        console.log('✅ 弹窗显示');
+      });
+
+      captcha.onSuccess(function() {
+        console.log('✅ 验证成功');
+        const result = captcha.getValidate();
+        console.log('验证参数:', result);
+        alert('验证成功！查看console获取参数');
+      });
+
+      captcha.onFail(function() {
+        console.log('❌ 验证失败');
+      });
+
+      captcha.onError(function(err) {
+        console.error('❌ 验证错误:', err);
+      });
+
+      captcha.onClose(function() {
+        console.log('⚠️ 用户关闭');
+      });
+    });
+
+    // 获取验证码按钮
+    document.getElementById('getCodeBtn').addEventListener('click', function() {
+      const phone = document.getElementById('phone').value;
+      
+      if (!phone || phone.length !== 11) {
+        alert('请输入11位手机号');
+        return;
+      }
+
+      if (!captchaObj) {
+        alert('验证码未初始化，请刷新页面');
+        return;
+      }
+
+      console.log('调用showCaptcha()...');
+      captchaObj.showCaptcha();
+    });
+
+    // 登录按钮
+    document.getElementById('loginBtn').addEventListener('click', function() {
+      alert('这只是测试页面');
+    });
+  </script>
+</body>
+</html>
