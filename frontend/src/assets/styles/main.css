@@ -1,5 +1,13 @@
+/* ========================================
+   Vela 主样式文件
+   导入设计系统
+   ======================================== */
+
+@import './design-tokens.css';
+@import './animations.css';
+
 /* ===================================
-   CSS 变量定义
+   CSS 变量定义（保留向后兼容）
    =================================== */
 :root {
   /* 主色调 - 优雅深紫 */
@@ -64,19 +72,6 @@
    =================================== */
 * {
   margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html {
-  font-size: 16px;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-body {
-  font-family: var(--font-sans);
-  background-color: var(--color-bg);
   color: var(--color-text-primary);
   line-height: 1.6;
   overflow-x: hidden;

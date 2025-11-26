@@ -19,7 +19,7 @@ export const useUserStore = defineStore('user', () => {
   // 登录
   const login = async (credentials) => {
     try {
-      const response = await authAPI.login(credentials)
+      const response = await authAPI.phoneLogin(credentials)
       const { access_token, user: userData } = response.data
 
       token.value = access_token
@@ -30,9 +30,19 @@ export const useUserStore = defineStore('user', () => {
 
       return { success: true }
     } catch (error) {
+      console.error('Login error:', error)
+      // 改进的错误处理
+      let message = '登录失败，请稍后重试'
+      
+      if (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error')) {
+        message = '网络连接失败，请检查网络后重试'
+      } else if (error.response) {
+        message = error.response.data?.message || '手机或验证码错误'
+      }
+
       return {
         success: false,
-        message: error.response?.data?.message || '登录失败',
+        message
       }
     }
   }
@@ -40,7 +50,7 @@ export const useUserStore = defineStore('user', () => {
   // 注册
   const register = async (data) => {
     try {
-      const response = await authAPI.register(data)
+      const response = await authAPI.phoneLogin(data)
       const { access_token, user: userData } = response.data
 
       token.value = access_token
@@ -51,9 +61,18 @@ export const useUserStore = defineStore('user', () => {
 
       return { success: true }
     } catch (error) {
+      console.error('Register error:', error)
+      let message = '注册失败，请稍后重试'
+      
+      if (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error')) {
+        message = '网络连接失败，请检查网络后重试'
+      } else if (error.response) {
+        message = error.response.data?.message || '注册失败'
+      }
+
       return {
         success: false,
-        message: error.response?.data?.message || '注册失败',
+        message
       }
     }
   }
@@ -78,6 +97,36 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  // 手机号登录/注册
+  const phoneLogin = async (credentials) => {
+    try {
+      const response = await authAPI.phoneLogin(credentials)
+      const { access_token, user: userData } = response.data
+
+      token.value = access_token
+      user.value = userData
+
+      localStorage.setItem('token', access_token)
+      localStorage.setItem('user', JSON.stringify(userData))
+
+      return { success: true }
+    } catch (error) {
+      console.error('Phone login error:', error)
+      let message = '登录失败，请稍后重试'
+      
+      if (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error')) {
+        message = '网络连接失败，请检查网络后重试'
+      } else if (error.response) {
+        message = error.response.data?.message || '验证码错误或已过期'
+      }
+
+      return {
+        success: false,
+        message
+      }
+    }
+  }
+
   // 初始化
   init()
 
@@ -89,5 +138,6 @@ export const useUserStore = defineStore('user', () => {
     register,
     logout,
     fetchProfile,
+    phoneLogin,
   }
 })

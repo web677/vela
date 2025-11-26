@@ -70,11 +70,15 @@
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
+import { useNotification } from '@/composables/useNotification'
+import { useConfirm } from '@/composables/useConfirm'
 import { formatPrice } from '@/utils/format'
 import Loading from '@/components/common/Loading.vue'
 
 const router = useRouter()
 const cartStore = useCartStore()
+const notification = useNotification()
+const { confirmDelete } = useConfirm()
 
 onMounted(() => {
   cartStore.fetchCart()
@@ -85,24 +89,26 @@ const updateQuantity = async (item, newQuantity) => {
   
   const result = await cartStore.updateCartItem(item.id, newQuantity)
   if (!result.success) {
-    alert(result.message || '更新失败')
+    notification.error(result.message || '更新失败')
   }
 }
 
 const removeItem = async (itemId) => {
-  if (confirm('确定要删除这个商品吗？')) {
+  const confirmed = await confirmDelete('确定要删除这个商品吗？')
+  if (confirmed) {
     const result = await cartStore.removeCartItem(itemId)
     if (!result.success) {
-      alert(result.message || '删除失败')
+      notification.error(result.message || '删除失败')
     }
   }
 }
 
 const clearCart = async () => {
-  if (confirm('确定要清空购物车吗？')) {
+  const confirmed = await confirmDelete('确定要清空购物车吗？此操作无法撤销。')
+  if (confirmed) {
     const result = await cartStore.clearCart()
     if (!result.success) {
-      alert(result.message || '清空失败')
+      notification.error(result.message || '清空失败')
     }
   }
 }

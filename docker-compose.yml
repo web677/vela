@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: vela-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-7d}
+      - ALIYUN_ACCESS_KEY_ID=${ALIYUN_ACCESS_KEY_ID}
+      - ALIYUN_ACCESS_KEY_SECRET=${ALIYUN_ACCESS_KEY_SECRET}
+      - SMS_SIGN_NAME=${SMS_SIGN_NAME}
+      - SMS_TEMPLATE_CODE=${SMS_TEMPLATE_CODE}
+    restart: unless-stopped
+    networks:
+      - vela-network
+
+  frontend:
+    build: ./frontend
+    container_name: vela-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - vela-network
+
+networks:
+  vela-network:
+    driver: bridge

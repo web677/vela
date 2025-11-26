@@ -2,79 +2,164 @@
   <footer class="footer">
     <div class="footer-container">
       <div class="footer-section">
-        <h3>关于 VELA</h3>
-        <p>专注于为您提供高品质的成人用品</p>
+        <h3 class="font-heading">Vela</h3>
+        <p class="tagline">优雅品质，温柔陪伴</p>
+        <p class="description">致力于为您提供高品质、优雅含蓄的成人用品，专注隐私保护与用户体验。</p>
       </div>
+
       <div class="footer-section">
-        <h3>客户服务</h3>
+        <h3>购物指南</h3>
         <ul>
-          <li><a href="#">配送说明</a></li>
-          <li><a href="#">退换货政策</a></li>
-          <li><a href="#">隐私保护</a></li>
+          <li><router-link to="/products">浏览商品</router-link></li>
+          <li><router-link to="/legal/shipping">配送说明</router-link></li>
+          <li><router-link to="/legal/returns">退换货政策</router-link></li>
+          <li><router-link to="/legal/after-sales">售后服务</router-link></li>
         </ul>
       </div>
+
+      <div class="footer-section">
+        <h3>法律信息</h3>
+        <ul>
+          <li><router-link to="/legal/privacy">隐私政策</router-link></li>
+          <li><router-link to="/legal/terms">用户服务协议</router-link></li>
+        </ul>
+      </div>
+
       <div class="footer-section">
         <h3>联系我们</h3>
-        <p>客服邮箱：support@vela.com</p>
+        <ul class="contact-list">
+          <li>
+            <span class="icon">📧</span>
+            <span>service@vela.com</span>
+          </li>
+          <li>
+            <span class="icon">📞</span>
+            <span>400-XXX-XXXX</span>
+          </li>
+          <li>
+            <span class="icon">🕐</span>
+            <span>工作日 9:00-18:00</span>
+          </li>
+        </ul>
       </div>
     </div>
+
     <div class="footer-bottom">
-      <p>&copy; 2024 Vela. All rights reserved.</p>
+      <p>&copy; 2024 Vela. All rights reserved. | 保护您的隐私是我们的承诺</p>
     </div>
   </footer>
 </template>
 
 <style scoped>
 .footer {
-  background: var(--color-surface);
-  border-top: 1px solid var(--color-border);
-  margin-top: auto;
+  background-color: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border-light);
+  margin-top: var(--spacing-4xl);
 }
 
 .footer-container {
-  max-width: 1400px;
+  max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: 3rem 1.5rem;
+  padding: var(--spacing-3xl) var(--container-padding);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--spacing-2xl);
 }
 
 .footer-section h3 {
   color: var(--color-text-primary);
-  margin-bottom: 1rem;
-  font-size: 1.125rem;
+  margin-bottom: var(--spacing-lg);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
 }
 
-.footer-section p,
-.footer-section li {
+.tagline {
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+  margin-bottom: var(--spacing-sm);
+}
+
+.description {
   color: var(--color-text-secondary);
-  font-size: 0.875rem;
-  line-height: 2;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
 }
 
 .footer-section ul {
   list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-section li {
+  margin-bottom: var(--spacing-sm);
 }
 
 .footer-section a {
   color: var(--color-text-secondary);
   text-decoration: none;
-  transition: color var(--transition-base);
+  font-size: var(--font-size-sm);
+  transition: color var(--duration-base) var(--ease-in-out);
+  display: inline-block;
 }
 
 .footer-section a:hover {
   color: var(--color-primary);
+  transform: translateX(2px);
+}
+
+.contact-list li {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.contact-list .icon {
+  font-size: var(--font-size-base);
 }
 
 .footer-bottom {
-  border-top: 1px solid var(--color-border);
-  padding: 1.5rem;
+  border-top: 1px solid var(--color-border-light);
+  padding: var(--spacing-xl);
   text-align: center;
+  background-color: var(--color-bg-tertiary);
 }
 
 .footer-bottom p {
   color: var(--color-text-muted);
-  font-size: 0.875rem;
+  font-size: var(--font-size-xs);
+  margin: 0;
+}
+
+/* 移动端优化 */
+@media (max-width: 768px) {
+  .footer-container {
+    grid-template-columns: repeat(2, 1fr);
+    padding: var(--spacing-2xl) var(--container-padding);
+    gap: var(--spacing-xl);
+  }
+
+  .footer-section:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .footer-bottom {
+    padding: var(--spacing-lg);
+  }
+
+  .footer-bottom p {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-container {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
+

@@ -5,19 +5,52 @@
       <router-view />
     </main>
     <Footer />
-    <Toast v-if="showToast" :message="toastMessage" :type="toastType" />
+    <Notification />
+    <ConfirmDialog 
+      :show="confirmState.show"
+      :title="confirmState.title"
+      :message="confirmState.message"
+      :confirmText="confirmState.confirmText"
+      :cancelText="confirmState.cancelText"
+      :type="confirmState.type"
+      :onConfirm="handleConfirm"
+      :onCancel="handleCancel"
+    />
+    <TabBar v-if="isMobile" />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import Header from './components/common/Header.vue'
 import Footer from './components/common/Footer.vue'
-import Toast from './components/common/Toast.vue'
+import Notification from './components/common/Notification.vue'
+import ConfirmDialog from './components/common/ConfirmDialog.vue'
+import TabBar from './components/mobile/TabBar.vue'
+import { useConfirm } from './composables/useConfirm'
 
-const showToast = ref(false)
-const toastMessage = ref('')
-const toastType = ref('success')
+const { confirmState, handleConfirm, handleCancel } = useConfirm()
+
+const isMobile = ref(false)
+
+const checkMobile = () => {
+  isMobile.value = window.innerWidth < 768
+  if (isMobile.value) {
+    document.body.classList.add('has-tab-bar')
+  } else {
+    document.body.classList.remove('has-tab-bar')
+  }
+}
+
+onMounted(() => {
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile)
+  document.body.classList.remove('has-tab-bar')
+})
 </script>
 
 <style>

@@ -30,10 +30,22 @@ apiClient.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      // Token 过期或无效
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      window.location.href = '/login'
+      // 检查当前路由，避免在登录/注册页面重定向
+      const currentPath = window.location.pathname
+      const isAuthPage = currentPath === '/login' || currentPath === '/register'
+      
+      if (!isAuthPage) {
+        // 只在非认证页面时才清除token并重定向
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        // 使用 router 而不是 window.location 以避免页面刷新
+        window.location.href = '/login'
+      }
+      // 如果在登录/注册页面，只清除token，不重定向
+      else {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+      }
     }
     return Promise.reject(error)
   }

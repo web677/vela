@@ -90,12 +90,14 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProductStore } from '@/stores/product'
 import { useCartStore } from '@/stores/cart'
+import { useNotification } from '@/composables/useNotification'
 import { formatPrice } from '@/utils/format'
 import Loading from '@/components/common/Loading.vue'
 
 const route = useRoute()
 const productStore = useProductStore()
 const cartStore = useCartStore()
+const notification = useNotification()
 
 const product = computed(() => productStore.currentProduct)
 const currentImage = ref('')
@@ -129,10 +131,10 @@ const addToCart = async () => {
   loading.value = false
   
   if (result.success) {
-    alert('已加入购物车！')
+    notification.success('已加入购物车！')
     quantity.value = 1
   } else {
-    alert(result.message || '添加失败')
+    notification.error(result.message || '添加失败')
   }
 }
 </script>

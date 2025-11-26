@@ -34,6 +34,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
+import { useNotification } from '@/composables/useNotification'
 import { formatPrice } from '@/utils/format'
 
 const props = defineProps({
@@ -45,6 +46,7 @@ const props = defineProps({
 
 const router = useRouter()
 const cartStore = useCartStore()
+const notification = useNotification()
 const loading = ref(false)
 
 const goToDetail = () => {
@@ -57,9 +59,9 @@ const addToCart = async () => {
   loading.value = false
   
   if (result.success) {
-    alert('已加入购物车！')
+    notification.success('已加入购物车！')
   } else {
-    alert(result.message || '添加失败')
+    notification.error(result.message || '添加失败')
   }
 }
 </script>

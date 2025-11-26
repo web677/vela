@@ -1,0 +1,219 @@
+/* ========================================
+   Vela 设计系统 - 变量定义
+   优雅 · 含蓄 · 轻柔 · 文艺 · 清新
+   ======================================== */
+
+:root {
+  /* ========================================
+     色彩系统 - 温柔优雅
+     ======================================== */
+  
+  /* 主色系 - 雾霭紫 */
+  --color-primary: #B8A4D4;
+  --color-primary-light: #D4C5E8;
+  --color-primary-dark: #9B84BD;
+  --color-primary-subtle: #E8E0F2;
+  
+  /* 辅助色 - 月白系列 */
+  --color-secondary: #E8E4F0;
+  --color-accent-warm: #F4E8D9;     /* 琥珀暖色 */
+  --color-accent-cool: #DCE9E8;     /* 浅青灰 */
+  --color-accent-pink: #F0E4E8;     /* 淡粉灰 */
+  
+  /* 系列主题色 */
+  --color-series-forest: #9BC4A3;   /* 雾光森林 */
+  --color-series-moon: #E8E4F0;     /* 月白时分 */
+  --color-series-amber: #F4E8D9;    /* 琥珀余温 */
+  --color-series-feather: #F0E4E8;  /* 浅眠之羽 */
+  --color-series-dawn: #DCE9E8;     /* 晨曦低语 */
+  --color-series-star: #A8C8D8;     /* 星河印记 */
+  --color-series-twilight: #D4C5E8; /* 薄暮微光 */
+  --color-series-garden: #E8C89C;   /* 静谧花园 */
+  
+  /* 背景色系统 - 柔和层次 */
+  --color-bg-primary: #FAFAF9;      /* 主背景 - 温暖白 */
+  --color-bg-secondary: #F5F4F2;    /* 次级背景 */
+  --color-bg-tertiary: #EEEEE8;     /* 卡片背景 */
+  --color-bg-elevated: #FFFFFF;     /* 悬浮背景 */
+  --color-bg-overlay: rgba(0, 0, 0, 0.6);
+  
+  /* 文本色系统 - 柔和对比 */
+  --color-text-primary: #3A3A3A;    /* 主文本 - 柔和黑 */
+  --color-text-secondary: #6B6B6B;  /* 次级文本 */
+  --color-text-muted: #9A9A9A;      /* 弱化文本 */
+  --color-text-disabled: #C8C8C8;   /* 禁用文本 */
+  --color-text-inverse: #FFFFFF;    /* 反色文本 */
+  
+  /* 边框色系统 */
+  --color-border-light: #E8E8E8;
+  --color-border-default: #D4D4D4;
+  --color-border-dark: #B8B8B8;
+  
+  /* 功能色 - 温和提示 */
+  --color-success: #9BC4A3;         /* 成功 - 柔和绿 */
+  --color-warning: #E8C89C;         /* 警告 - 温暖橙 */
+  --color-error: #D4A5A5;           /* 错误 - 柔和红 */
+  --color-info: #A8C8D8;            /* 信息 - 淡蓝 */
+  
+  /* ========================================
+     字体系统
+     ======================================== */
+  
+  /* 字体族 */
+  --font-family-base: 'Noto Sans SC', 'PingFang SC', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family-heading: 'Noto Serif SC', 'Songti SC', serif;
+  --font-family-serif: 'Noto Serif SC', serif;
+  --font-family-mono: 'SF Mono', 'Consolas', monospace;
+  
+  /* 字号 - 移动端优先 */
+  --font-size-xs: 0.75rem;      /* 12px - 小标签 */
+  --font-size-sm: 0.875rem;     /* 14px - 辅助文字 */
+  --font-size-base: 1rem;       /* 16px - 正文 */
+  --font-size-lg: 1.125rem;     /* 18px - 强调 */
+  --font-size-xl: 1.25rem;      /* 20px - 小标题 */
+  --font-size-2xl: 1.5rem;      /* 24px - 标题 */
+  --font-size-3xl: 1.875rem;    /* 30px - 大标题 */
+  --font-size-4xl: 2.25rem;     /* 36px - Hero */
+  
+  /* 字重 */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* 行高 */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  --line-height-loose: 2;
+  
+  /* ========================================
+     间距系统
+     ======================================== */
+  
+  --spacing-xs: 0.25rem;    /* 4px */
+  --spacing-sm: 0.5rem;     /* 8px */
+  --spacing-md: 1rem;       /* 16px */
+  --spacing-lg: 1.5rem;     /* 24px */
+  --spacing-xl: 2rem;       /* 32px */
+  --spacing-2xl: 3rem;      /* 48px */
+  --spacing-3xl: 4rem;      /* 64px */
+  --spacing-4xl: 6rem;      /* 96px */
+  
+  /* ========================================
+     圆角系统
+     ======================================== */
+  
+  --radius-xs: 4px;         /* 小元素 - 标签 */
+  --radius-sm: 6px;         /* 按钮 */
+  --radius-md: 8px;         /* 卡片 */
+  --radius-lg: 12px;        /* 大卡片 */
+  --radius-xl: 16px;        /* 模态框 */
+  --radius-2xl: 24px;       /* 特大元素 */
+  --radius-full: 9999px;    /* 圆形 */
+  
+  /* ========================================
+     阴影系统
+     ======================================== */
+  
+  /* 柔和阴影 */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 12px 24px rgba(0, 0, 0, 0.12);
+  --shadow-2xl: 0 20px 40px rgba(0, 0, 0, 0.15);
+  
+  /* 浮起效果 */
+  --shadow-hover: 0 8px 20px rgba(184, 164, 212, 0.2);
+  --shadow-focus: 0 0 0 3px rgba(184, 164, 212, 0.3);
+  
+  /* 内阴影 */
+  --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+  
+  /* ========================================
+     触控目标尺寸
+     ======================================== */
+  
+  --touch-target-min: 44px;
+  
+  /* 按钮高度 */
+  --button-height-sm: 36px;
+  --button-height-md: 44px;
+  --button-height-lg: 52px;
+  
+  /* 表单控件 */
+  --input-height: 48px;
+  --input-font-size: 16px;  /* 防止 iOS 缩放 */
+  
+  /* ========================================
+     过渡时长
+     ======================================== */
+  
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 350ms;
+  --duration-slower: 500ms;
+  
+  /* 缓动函数 */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  
+  /* ========================================
+     Z-index 层级
+     ======================================== */
+  
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+  --z-notification: 9999;
+  
+  /* ========================================
+     网格系统
+     ======================================== */
+  
+  --container-max-width: 1400px;
+  --container-padding: 1rem;
+  
+  /* 断点 */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+
+/* ========================================
+   桌面端调整
+   ======================================== */
+
+@media (min-width: 768px) {
+  :root {
+    --font-size-base: 1.0625rem;  /* 17px */
+    --font-size-3xl: 2.25rem;     /* 36px */
+    --font-size-4xl: 3rem;        /* 48px */
+    --container-padding: 2rem;
+  }
+}
+
+/* ========================================
+   深色模式支持（预留）
+   ======================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg-primary: #1A1A1A;
+    --color-bg-secondary: #242424;
+    --color-bg-tertiary: #2E2E2E;
+    --color-text-primary: #E8E8E8;
+    --color-text-secondary: #B8B8B8;
+    --color-text-muted: #888888;
+  }
+}

@@ -2,7 +2,7 @@ export class AuthResponseDto {
   access_token: string;
   user: {
     id: string;
-    email: string;
+    email?: string;
     full_name?: string;
     phone?: string;
   };

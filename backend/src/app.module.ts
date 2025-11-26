@@ -8,7 +8,9 @@ import { CategoriesModule } from './categories/categories.module';
 import { CartModule } from './cart/cart.module';
 import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
+import { SeriesModule } from './series/series.module';
 import { DatabaseModule } from './database/database.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -17,6 +19,7 @@ import { DatabaseModule } from './database/database.module';
       load: [configuration],
     }),
     DatabaseModule,
+    RedisModule,
     AuthModule,
     UsersModule,
     ProductsModule,
@@ -24,6 +27,7 @@ import { DatabaseModule } from './database/database.module';
     CartModule,
     OrdersModule,
     PaymentsModule,
+    SeriesModule,
   ],
 })
 export class AppModule {}

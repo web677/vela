@@ -117,12 +117,16 @@
 import { onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useOrderStore } from '@/stores/order'
+import { useNotification } from '@/composables/useNotification'
+import { useConfirm } from '@/composables/useConfirm'
 import { formatPrice, formatDate, getOrderStatusText, getOrderStatusColor } from '@/utils/format'
 import Loading from '@/components/common/Loading.vue'
 
 const route = useRoute()
 const router = useRouter()
 const orderStore = useOrderStore()
+const notification = useNotification()
+const { confirm } = useConfirm()
 
 const order = computed(() => orderStore.currentOrder)
 
@@ -136,13 +140,14 @@ const getStatusColor = (status) => {
 }
 
 const cancelOrder = async () => {
-  if (confirm('确定要取消这个订单吗？')) {
+  const confirmed = await confirm('确定要取消这个订单吗？', '取消订单')
+  if (confirmed) {
     const result = await orderStore.cancelOrder(order.value.id)
     if (result.success) {
-      alert('订单已取消')
+      notification.success('订单已取消')
       await orderStore.fetchOrder(order.value.id)
     } else {
-      alert(result.message || '取消失败')
+      notification.error(result.message || '取消失败')
     }
   }
 }

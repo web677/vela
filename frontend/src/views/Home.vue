@@ -3,23 +3,29 @@
     <!-- Hero Section -->
     <section class="hero">
       <div class="hero-content">
-        <h1 class="hero-title animate-slide-in-up">欢迎来到 VELA</h1>
-        <p class="hero-subtitle animate-slide-in-up">高品质成人用品，专注您的隐私与体验</p>
+        <h1 class="hero-title animate-slide-in-up font-heading">欢迎来到 VELA</h1>
+        <p class="hero-subtitle animate-slide-in-up">优雅品质，温柔陪伴</p>
         <router-link to="/products" class="btn btn-primary btn-lg animate-slide-in-up">
-          立即选购
+          探索系列
         </router-link>
       </div>
     </section>
 
+    <!-- Series Carousel -->
+    <section class="section container">
+      <SeriesCarousel v-if="seriesList.length" :series-list="seriesList" />
+      <Loading v-else-if="seriesLoading" text="加载系列中..." />
+    </section>
+
     <!-- Featured Products -->
-    <section class="section">
+    <section class="section container">
       <h2 class="section-title">精选推荐</h2>
       <Loading v-if="productStore.loading" text="加载中..." />
       <ProductGrid v-else :products="featuredProducts" :columns="4" />
     </section>
 
     <!-- Categories -->
-    <section class="section">
+    <section class="section container">
       <h2 class="section-title">热门分类</h2>
       <div class="categories-grid">
         <div 
@@ -29,7 +35,7 @@
           @click="goToCategory(category)"
         >
           <div class="category-image">
-            <img :src="category.image_url ||'/placeholder.jpg'" :alt="category.name" />
+            <img :src="category.image_url || '/placeholder.jpg'" :alt="category.name" />
           </div>
           <h3>{{ category.name }}</h3>
         </div>
@@ -39,14 +45,20 @@
 </template>
 
 <script setup>
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProductStore } from '@/stores/product'
+import { useSeriesStore } from '@/stores/series'
 import ProductGrid from '@/components/product/ProductGrid.vue'
+import SeriesCarousel from '@/components/series/SeriesCarousel.vue'
 import Loading from '@/components/common/Loading.vue'
 
 const router = useRouter()
 const productStore = useProductStore()
+const seriesStore = useSeriesStore()
+
+const seriesList = ref([])
+const seriesLoading = ref(false)
 
 const featuredProducts = computed(() => 
   productStore.products.filter(p => p.is_featured).slice(0, 8)
@@ -55,6 +67,15 @@ const featuredProducts = computed(() =>
 const categories = computed(() => productStore.categories)
 
 onMounted(async () => {
+  // Fetch series
+  seriesLoading.value = true
+  const seriesResult = await seriesStore.fetchSeriesList()
+  if (seriesResult.success) {
+    seriesList.value = seriesResult.data
+  }
+  seriesLoading.value = false
+
+  // Fetch products and categories
   await Promise.all([
     productStore.fetchProducts({ limit: 20 }),
     productStore.fetchCategories()

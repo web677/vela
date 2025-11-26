@@ -129,12 +129,15 @@ import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useOrderStore } from '@/stores/order'
 import { useUserStore } from '@/stores/user'
+import { useNotification } from '@/composables/useNotification'
+import { validateOrderForm } from '@/utils/formValidation'
 import { formatPrice } from '@/utils/format'
 
 const router = useRouter()
 const cartStore = useCartStore()
 const orderStore = useOrderStore()
 const userStore = useUserStore()
+const notification = useNotification()
 
 const submitting = ref(false)
 
@@ -170,8 +173,29 @@ onMounted(() => {
 })
 
 const submitOrder = async () => {
+  // 验证购物车
   if (cartStore.items.length === 0) {
-    alert('购物车是空的')
+    notification.warning('购物车是空的')
+    return
+  }
+
+  // 验证表单
+  const validation = validateOrderForm(form.value, cartStore.items)
+  
+  if (!validation.valid) {
+    // 显示第一个错误
+    notification.error(validation.errors[0])
+    
+    // 如果有多个错误，延迟显示其他错误
+    if (validation.errors.length > 1) {
+      setTimeout(() => {
+        validation.errors.slice(1, 3).forEach((error, index) => {
+          setTimeout(() => {
+            notification.warning(error)
+          }, index * 300)
+        })
+      }, 500)
+    }
     return
   }
 
@@ -190,12 +214,13 @@ const submitOrder = async () => {
   submitting.value = false
 
   if (result.success) {
-    alert('订单创建成功！')
+    notification.success('订单创建成功！')
     router.push(`/orders/${result.data.id}`)
   } else {
-    alert(result.message || '订单创建失败')
+    notification.error(result.message || '订单创建失败')
   }
 }
+
 </script>
 
 <style scoped>
