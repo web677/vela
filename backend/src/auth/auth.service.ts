@@ -230,11 +230,12 @@ export class AuthService {
   }
 
   async phoneLoginOrRegister(phoneLoginDto: PhoneLoginDto): Promise<AuthResponseDto> {
-    const { phone, token } = phoneLoginDto;
+    const { phone, token, gender } = phoneLoginDto;
 
     console.log('=== Phone Login/Register Attempt ===');
     console.log('Phone:', phone);
     console.log('Token:', token);
+    console.log('Gender:', gender);
 
     try {
       // 1. 验证短信验证码（从Redis）
@@ -262,6 +263,16 @@ export class AuthService {
         userId = existingProfile.id;
         userProfile = existingProfile;
         console.log('Existing profile found:', userId);
+        
+        // 如果提供了新的性别偏好，更新用户资料
+        if (gender && gender !== existingProfile.gender) {
+          await this.supabaseService
+            .getAdminClient()
+            .from('user_profiles')
+            .update({ gender })
+            .eq('id', userId);
+          userProfile.gender = gender;
+        }
       } else {
         // 新用户，需要在 Supabase Auth 中创建用户以获取有效的 ID
         console.log('Creating new user in Supabase Auth...');
@@ -311,6 +322,7 @@ export class AuthService {
           .insert({
             id: userId,
             phone,
+            gender: gender || 'male', // 保存性别，默认男性
             // email 现在是可选的，不需要填充虚拟邮箱
           });
 

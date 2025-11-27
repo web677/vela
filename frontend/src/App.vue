@@ -15,6 +15,7 @@
     :onConfirm="handleConfirm"
     :onCancel="handleCancel"
   />
+  <GenderModal />
   <TabBar v-if="isMobile" />
 </template>
 
@@ -24,6 +25,7 @@ import Header from "./components/common/Header.vue";
 import Footer from "./components/common/Footer.vue";
 import Notification from "./components/common/Notification.vue";
 import ConfirmDialog from "./components/common/ConfirmDialog.vue";
+import GenderModal from "./components/common/GenderModal.vue";
 import TabBar from "./components/mobile/TabBar.vue";
 import { useConfirm } from "./composables/useConfirm";
 

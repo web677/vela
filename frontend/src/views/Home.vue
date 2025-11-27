@@ -70,17 +70,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useProductStore } from "@/stores/product";
+import { useUserStore } from "@/stores/user";
 import { VButton, VCard } from "@/components/ui";
 import ProductGrid from "@/components/product/ProductGrid.vue";
 
 const router = useRouter();
 const productStore = useProductStore();
+const userStore = useUserStore();
 
 const loading = ref(true);
 const featuredProducts = ref([]);
+
+const userGender = computed(() => userStore.gender || "male");
 
 const categories = [
   {
@@ -114,6 +118,7 @@ onMounted(async () => {
   loading.value = true;
   const result = await productStore.fetchProducts({
     limit: 8,
+    gender: userGender.value, // 添加性别参数
   });
   if (result) {
     featuredProducts.value = productStore.products;

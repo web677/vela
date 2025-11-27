@@ -8,9 +8,12 @@ export class SeriesController {
   constructor(private readonly seriesService: SeriesService) {}
 
   @Get()
-  async findAll(@Query('includeInactive') includeInactive?: string) {
+  async findAll(
+    @Query('includeInactive') includeInactive?: string,
+    @Query('gender') gender?: string,
+  ) {
     const include = includeInactive === 'true';
-    return this.seriesService.findAll(include);
+    return this.seriesService.findAll(include, gender);
   }
 
   @Get(':slug')

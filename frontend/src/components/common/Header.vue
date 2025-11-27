@@ -18,6 +18,17 @@
 
       <!-- Actions -->
       <div class="luxury-header-actions">
+        <!-- Gender Toggle -->
+        <button
+          class="luxury-action-link gender-toggle"
+          @click="toggleGender"
+          :title="`切换到${userStore.gender === 'male' ? '女性' : '男性'}模式`"
+        >
+          <span class="luxury-action-icon">{{
+            userStore.gender === "male" ? "♂" : "♀"
+          }}</span>
+        </button>
+
         <router-link to="/cart" class="luxury-action-link">
           <span class="luxury-action-icon">🛒</span>
           <span v-if="cartStore.totalItems > 0" class="luxury-cart-badge">
@@ -116,6 +127,11 @@ const handleLogout = () => {
   userStore.logout();
   closeMobileMenu();
   router.push("/");
+};
+
+const toggleGender = () => {
+  const newGender = userStore.gender === "male" ? "female" : "male";
+  userStore.setGender(newGender);
 };
 
 onMounted(() => {
@@ -266,6 +282,23 @@ onUnmounted(() => {
 
 .luxury-action-icon {
   font-size: var(--font-size-xl);
+}
+
+.gender-toggle {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.gender-toggle:hover {
+  background: var(--color-bg-tertiary);
+  transform: rotate(180deg);
+}
+
+.gender-toggle .luxury-action-icon {
+  font-size: 20px;
 }
 
 .luxury-cart-badge {

@@ -6,7 +6,7 @@ import { CreateSeriesDto } from './dto/create-series.dto';
 export class SeriesService {
   constructor(private supabase: SupabaseService) {}
 
-  async findAll(includeInactive = false) {
+  async findAll(includeInactive = false, gender?: string) {
     let query = this.supabase.getClient()
       .from('product_series')
       .select('*')
@@ -14,6 +14,11 @@ export class SeriesService {
 
     if (!includeInactive) {
       query = query.eq('is_active', true);
+    }
+
+    // Filter by gender if provided
+    if (gender) {
+      query = query.or(`target_gender.eq.${gender},target_gender.eq.all`);
     }
 
     const { data, error } = await query;

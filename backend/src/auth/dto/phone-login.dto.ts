@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, Matches } from 'class-validator';
+import { IsNotEmpty, IsString, Matches, IsOptional, IsIn } from 'class-validator';
 
 export class PhoneLoginDto {
   @IsString()
@@ -9,4 +9,9 @@ export class PhoneLoginDto {
   @IsString()
   @IsNotEmpty()
   token!: string;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['male', 'female'])
+  gender?: string;
 }

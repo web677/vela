@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsNumber, Min } from 'class-validator';
+import { IsOptional, IsString, IsNumber, Min, IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class QueryProductDto {
@@ -29,4 +29,9 @@ export class QueryProductDto {
   @IsOptional()
   @IsString()
   order?: 'asc' | 'desc' = 'desc';
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['male', 'female', 'all'])
+  gender?: string;
 }

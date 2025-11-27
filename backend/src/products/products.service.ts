@@ -8,12 +8,16 @@ export class ProductsService {
   constructor(private supabaseService: SupabaseService) {}
 
   async findAll(query: QueryProductDto) {
-    const { category, search, page = 1, limit = 20, sort = 'created_at', order = 'desc' } = query;
+    const { category, search, page = 1, limit = 20, sort = 'created_at', order = 'desc', gender } = query;
     
     let queryBuilder = this.supabaseService
       .getClient()
       .from('products')
-      .select('*, category:categories(id, name)', { count: 'exact' })
+      .select(`
+        *, 
+        category:categories(id, name, target_gender),
+        series:product_series(id, name, target_gender)
+      `, { count: 'exact' })
       .eq('is_active', true);
 
     // 按分类过滤
@@ -40,12 +44,26 @@ export class ProductsService {
       throw new Error(error.message);
     }
 
+    // 前端过滤：根据性别筛选（因为Supabase不支持关联表的OR条件）
+    let filteredData = data;
+    if (gender && data) {
+      filteredData = data.filter(product => {
+        const seriesMatch = !product.series || 
+                          product.series.target_gender === 'all' || 
+                          product.series.target_gender === gender;
+        const categoryMatch = !product.category || 
+                            product.category.target_gender === 'all' || 
+                            product.category.target_gender === gender;
+        return seriesMatch && categoryMatch;
+      });
+    }
+
     return {
-      data,
-      total: count,
+      data: filteredData,
+      total: filteredData?.length || 0,
       page,
       limit,
-      totalPages: Math.ceil(count / limit),
+      totalPages: Math.ceil((filteredData?.length || 0) / limit),
     };
   }
 

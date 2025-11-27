@@ -49,14 +49,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useUserStore } from "@/stores/user";
 import { VButton, VCard } from "@/components/ui";
 import apiClient from "@/api/client";
 
 const router = useRouter();
+const userStore = useUserStore();
 const loading = ref(true);
 const series = ref([]);
+
+const userGender = computed(() => userStore.gender || "male");
 
 const goToSeries = (seriesId) => {
   router.push(`/series/${seriesId}`);
@@ -65,7 +69,9 @@ const goToSeries = (seriesId) => {
 onMounted(async () => {
   loading.value = true;
   try {
-    const response = await apiClient.get("/series");
+    const response = await apiClient.get("/series", {
+      params: { gender: userGender.value },
+    });
     series.value = response.data || [];
   } catch (error) {
     console.error("Failed to fetch series:", error);

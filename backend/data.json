@@ -1,0 +1,369 @@
+{
+  "product_series": [
+    {
+      "slug": "soft-bloom",
+      "name": "初绽柔光",
+      "name_en": "Soft Bloom",
+      "subtitle": "轻柔入门，温和绽放",
+      "description": "如花朵初绽般的轻柔与温顺，专为第一次探索、或偏好温和体验的她打造。触感细腻、使用友好，让每一次靠近都安心而自在。",
+      "theme_color": "#F7E9ED",
+      "sort_order": 1,
+      "gender": "female",
+      "hero_image_url": null,
+      "is_active": true
+    },
+    {
+      "slug": "sense-flow",
+      "name": "灵感深流",
+      "name_en": "Sense Flow",
+      "subtitle": "智能感知，随心而动",
+      "description": "灵感如流，随触而至。智能科技与柔美设计结合，带来更加细腻、深度的体验。适合追求创新、节奏变化与高品质感官的她。",
+      "theme_color": "#DCDFF8",
+      "sort_order": 2,
+      "gender": "female",
+      "hero_image_url": null,
+      "is_active": true
+    },
+    {
+      "slug": "velvet-night",
+      "name": "绮夜余温",
+      "name_en": "Velvet Night",
+      "subtitle": "沉浸深层，温柔更深",
+      "description": "属于进阶体验的浓郁氛围，如丝绒般深邃、绵延。适合熟悉自身节奏、追求更深层触感、探索更丰富体验的她。",
+      "theme_color": "#C9B2CE",
+      "sort_order": 3,
+      "gender": "female",
+      "hero_image_url": null,
+      "is_active": true
+    },
+
+    {
+      "slug": "gentle-start",
+      "name": "初启轻行",
+      "name_en": "Gentle Start",
+      "subtitle": "轻松入门，自在掌控",
+      "description": "以轻量级体验为核心，让初次探索变得轻松自然。亲肤、易操作、节奏友好，适合刚接触的他稳稳迈出第一步。",
+      "theme_color": "#E6EEF4",
+      "sort_order": 4,
+      "gender": "male",
+      "hero_image_url": null,
+      "is_active": true
+    },
+    {
+      "slug": "tech-pulse",
+      "name": "智域脉动",
+      "name_en": "Tech Pulse",
+      "subtitle": "智能节奏，感官升级",
+      "description": "将科技的力量调和为精准而灵动的节奏。智能模式、灵活变化、性能优越，适合追求科技与多维体验的他。",
+      "theme_color": "#C8D4E2",
+      "sort_order": 5,
+      "gender": "male",
+      "hero_image_url": null,
+      "is_active": true
+    },
+    {
+      "slug": "dark-tide",
+      "name": "黎影深潮",
+      "name_en": "Dark Tide",
+      "subtitle": "强劲深层，沉浸不息",
+      "description": "为追求深度感官与强力体验的他所设计。节奏更深、力量更稳，沉浸如暗潮涌动，是熟悉自我节奏后的进阶之选。",
+      "theme_color": "#A5A8B5",
+      "sort_order": 6,
+      "gender": "male",
+      "hero_image_url": null,
+      "is_active": true
+    }
+  ],
+  "categories": [
+    {
+      "slug": "lubes",
+      "name": "润滑与护理",
+      "gender": "unisex",
+      "is_active": true
+    },
+    {
+      "slug": "couples-sets",
+      "name": "情侣互动",
+      "gender": "unisex",
+      "is_active": true
+    },
+    {
+      "slug": "solo-pleasure",
+      "name": "独享乐趣",
+      "gender": "unisex",
+      "is_active": true
+    }
+  ],
+  "products": [
+    {
+      "name": "轻羽初触震动棒",
+      "name_en": "Feather Touch Vibrator",
+      "subtitle": "柔和震动，初次友好",
+      "description": "专为初次体验设计的轻柔震动棒，小巧精致，静音舒适",
+      "category_slug": "solo-pleasure",
+      "series_slug": "soft-bloom",
+      "price": 198.0
+    },
+    {
+      "name": "丝滑水溶性润滑液",
+      "name_en": "Silky Water-Based Lube",
+      "subtitle": "天然温和，清洁方便",
+      "description": "高品质水溶性配方，温和不刺激，易清洗",
+      "category_slug": "lubes",
+      "series_slug": "soft-bloom",
+      "price": 68.0
+    },
+    {
+      "name": "智能遥控跳蛋",
+      "name_en": "Smart Remote Egg",
+      "subtitle": "APP远程，随心掌控",
+      "description": "支持手机APP控制，多种震动模式，静音设计",
+      "category_slug": "solo-pleasure",
+      "series_slug": "sense-flow",
+      "price": 328.0
+    },
+    {
+      "name": "情侣共振环",
+      "name_en": "Couples Sync Ring",
+      "subtitle": "双重震动，共享愉悦",
+      "description": "可充电震动环，增强双方体验，防水设计",
+      "category_slug": "couples-sets",
+      "series_slug": "sense-flow",
+      "price": 268.0
+    },
+    {
+      "name": "深度按摩棒",
+      "name_en": "Deep Massage Wand",
+      "subtitle": "强力深层，多档调节",
+      "description": "进阶级按摩棒，10档强度，USB充电",
+      "category_slug": "solo-pleasure",
+      "series_slug": "velvet-night",
+      "price": 458.0
+    },
+    {
+      "name": "绮夜奢华润滑油",
+      "name_en": "Velvet Luxury Lube",
+      "subtitle": "丝绒质感，持久滋润",
+      "description": "高端硅基润滑油，丝滑持久，防水配方",
+      "category_slug": "lubes",
+      "series_slug": "velvet-night",
+      "price": 138.0
+    },
+    {
+      "name": "情侣探索套装",
+      "name_en": "Couples Discovery Kit",
+      "subtitle": "丰富组合，一次满足",
+      "description": "包含震动环、润滑液、羽毛等多件套装",
+      "category_slug": "couples-sets",
+      "series_slug": "soft-bloom",
+      "price": 428.0
+    },
+    {
+      "name": "男士入门飞机杯",
+      "name_en": "Beginner Male Masturbator",
+      "subtitle": "柔软舒适，新手适用",
+      "description": "医用硅胶材质，柔软贴合，适合初次尝试",
+      "category_slug": "solo-pleasure",
+      "series_slug": "gentle-start",
+      "price": 268.0
+    },
+    {
+      "name": "智能震动环",
+      "name_en": "Smart Vibrating Ring",
+      "subtitle": "科技加持，精准刺激",
+      "description": "内置智能芯片，多种震动模式，增强持久力",
+      "category_slug": "solo-pleasure",
+      "series_slug": "tech-pulse",
+      "price": 388.0
+    },
+    {
+      "name": "强力震动棒",
+      "name_en": "Power Vibrator",
+      "subtitle": "澎湃动力，深度体验",
+      "description": "高强度震动，适合追求深度感官的进阶用户",
+      "category_slug": "solo-pleasure",
+      "series_slug": "dark-tide",
+      "price": 528.0
+    },
+    {
+      "name": "清新花香润滑液",
+      "name_en": "Fresh Floral Lube",
+      "subtitle": "淡雅花香，温柔呵护",
+      "description": "添加天然花卉精华，温和亲肤配方",
+      "category_slug": "lubes",
+      "series_slug": "soft-bloom",
+      "price": 88.0
+    },
+    {
+      "name": "智能感应按摩器",
+      "name_en": "Smart Sensor Massager",
+      "subtitle": "智能感知，精准调节",
+      "description": "内置传感器，根据反馈自动调节强度",
+      "category_slug": "solo-pleasure",
+      "series_slug": "sense-flow",
+      "price": 688.0
+    },
+    {
+      "name": "情侣双头震动器",
+      "name_en": "Couples Double Vibrator",
+      "subtitle": "双端设计，同步快乐",
+      "description": "创新双头设计，可同时刺激双方敏感部位",
+      "category_slug": "couples-sets",
+      "series_slug": "velvet-night",
+      "price": 598.0
+    },
+    {
+      "name": "迷你便携跳蛋",
+      "name_en": "Mini Portable Egg",
+      "subtitle": "小巧隐蔽，随身携带",
+      "description": "口红大小，超静音设计，USB充电",
+      "category_slug": "solo-pleasure",
+      "series_slug": "soft-bloom",
+      "price": 158.0
+    },
+    {
+      "name": "高端硅基润滑凝胶",
+      "name_en": "Premium Silicone Gel",
+      "subtitle": "医用硅胶，长效润滑",
+      "description": "医疗级硅基配方，超长持久，防水不沾",
+      "category_slug": "lubes",
+      "series_slug": "dark-tide",
+      "price": 168.0
+    },
+    {
+      "name": "G点精准刺激器",
+      "name_en": "G-Spot Stimulator",
+      "subtitle": "精准定位，深度愉悦",
+      "description": "符合人体工学弯曲设计，精准刺激G点",
+      "category_slug": "solo-pleasure",
+      "series_slug": "velvet-night",
+      "price": 398.0
+    },
+    {
+      "name": "情侣按摩蜡烛",
+      "name_en": "Couples Massage Candle",
+      "subtitle": "浪漫香氛，温热按摩",
+      "description": "点燃后融化为按摩油，香氛+按摩双重享受",
+      "category_slug": "couples-sets",
+      "series_slug": "sense-flow",
+      "price": 188.0
+    },
+    {
+      "name": "多频震动环",
+      "name_en": "Multi-Frequency Ring",
+      "subtitle": "多种模式，随心切换",
+      "description": "7种震动模式，可充电，柔软舒适",
+      "category_slug": "couples-sets",
+      "series_slug": "gentle-start",
+      "price": 218.0
+    },
+    {
+      "name": "智能APP飞机杯",
+      "name_en": "Smart APP Masturbator",
+      "subtitle": "远程互动，科技升级",
+      "description": "支持APP远程控制，多种模式可定制",
+      "category_slug": "solo-pleasure",
+      "series_slug": "tech-pulse",
+      "price": 758.0
+    },
+    {
+      "name": "温感润滑液",
+      "name_en": "Warming Lube",
+      "subtitle": "微温热感，舒适体验",
+      "description": "接触体温后产生温热感，增强愉悦体验",
+      "category_slug": "lubes",
+      "series_slug": "velvet-night",
+      "price": 98.0
+    },
+    {
+      "name": "智能震动内裤",
+      "name_en": "Smart Vibrating Panty",
+      "subtitle": "隐蔽穿戴，远程控制",
+      "description": "可穿戴震动器，支持远程APP控制",
+      "category_slug": "solo-pleasure",
+      "series_slug": "sense-flow",
+      "price": 428.0
+    },
+    {
+      "name": "情侣趣味骰子",
+      "name_en": "Couples Fun Dice",
+      "subtitle": "随机惊喜，增添情趣",
+      "description": "创意情趣骰子套装，增加互动乐趣",
+      "category_slug": "couples-sets",
+      "series_slug": "soft-bloom",
+      "price": 58.0
+    },
+    {
+      "name": "前列腺按摩器",
+      "name_en": "Prostate Massager",
+      "subtitle": "精准刺激，男士专属",
+      "description": "符合男性生理设计，震动+按压双重体验",
+      "category_slug": "solo-pleasure",
+      "series_slug": "dark-tide",
+      "price": 658.0
+    },
+    {
+      "name": "延时喷雾",
+      "name_en": "Delay Spray",
+      "subtitle": "温和配方，有效延时",
+      "description": "植物萃取配方，安全有效，无麻木感",
+      "category_slug": "lubes",
+      "series_slug": "gentle-start",
+      "price": 148.0
+    },
+    {
+      "name": "七彩变色震动棒",
+      "name_en": "Rainbow LED Vibrator",
+      "subtitle": "炫彩灯光，视觉盛宴",
+      "description": "内置LED灯效，7色变换，增加视觉趣味",
+      "category_slug": "solo-pleasure",
+      "series_slug": "sense-flow",
+      "price": 368.0
+    },
+    {
+      "name": "情侣互动游戏卡",
+      "name_en": "Couples Game Cards",
+      "subtitle": "趣味挑战，增进默契",
+      "description": "50张创意任务卡，增加情侣互动乐趣",
+      "category_slug": "couples-sets",
+      "series_slug": "tech-pulse",
+      "price": 88.0
+    },
+    {
+      "name": "自动伸缩飞机杯",
+      "name_en": "Auto Thrusting Masturbator",
+      "subtitle": "自动律动，解放双手",
+      "description": "电动伸缩设计，模拟真实体验，USB充电",
+      "category_slug": "solo-pleasure",
+      "series_slug": "dark-tide",
+      "price": 888.0
+    },
+    {
+      "name": "冰感润滑凝胶",
+      "name_en": "Cooling Gel",
+      "subtitle": "清凉舒爽，提神醒脑",
+      "description": "清凉薄荷配方，带来独特冰爽体验",
+      "category_slug": "lubes",
+      "series_slug": "tech-pulse",
+      "price": 78.0
+    },
+    {
+      "name": "吸吮式震动器",
+      "name_en": "Suction Vibrator",
+      "subtitle": "空气吸吮，独特快感",
+      "description": "创新吸吮技术，非接触式刺激",
+      "category_slug": "solo-pleasure",
+      "series_slug": "velvet-night",
+      "price": 568.0
+    },
+    {
+      "name": "情侣羽毛套装",
+      "name_en": "Couples Feather Kit",
+      "subtitle": "轻柔试探，温柔唤醒",
+      "description": "天然羽毛+眼罩组合，初学者友好",
+      "category_slug": "couples-sets",
+      "series_slug": "soft-bloom",
+      "price": 128.0
+    }
+  ]
+}

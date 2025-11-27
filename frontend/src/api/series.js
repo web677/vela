@@ -2,10 +2,12 @@ import client from './client'
 
 export const seriesApi = {
   // 获取所有系列
-  getAll: (includeInactive = false) => {
-    return client.get('/series', {
-      params: { includeInactive: includeInactive ? 'true' : 'false' }
-    })
+  getAll: (includeInactive = false, gender = null) => {
+    const params = { includeInactive: includeInactive ? 'true' : 'false' }
+    if (gender) {
+      params.gender = gender
+    }
+    return client.get('/series', { params })
   },
 
   // 根据 slug 获取系列详情

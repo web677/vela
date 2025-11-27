@@ -29,8 +29,9 @@ export const productAPI = {
 
 export const categoryAPI = {
   // 获取所有分类
-  getCategories() {
-    return apiClient.get('/categories')
+  getCategories(gender) {
+    const params = gender ? { gender } : {}
+    return apiClient.get('/categories', { params })
   },
 
   // 获取分类详情

@@ -6,13 +6,20 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 export class CategoriesService {
   constructor(private supabaseService: SupabaseService) {}
 
-  async findAll() {
-    const { data, error } = await this.supabaseService
+  async findAll(gender?: string) {
+    let query = this.supabaseService
       .getClient()
       .from('categories')
       .select('*')
       .eq('is_active', true)
       .order('sort_order', { ascending: true });
+
+    // Filter by gender if provided
+    if (gender) {
+      query = query.or(`target_gender.eq.${gender},target_gender.eq.all`);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       throw new Error(error.message);

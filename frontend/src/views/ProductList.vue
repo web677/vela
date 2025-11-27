@@ -89,11 +89,13 @@
 import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import { useProductStore } from "@/stores/product";
+import { useUserStore } from "@/stores/user";
 import { VButton, VCard, VInput } from "@/components/ui";
 import ProductGrid from "@/components/product/ProductGrid.vue";
 
 const route = useRoute();
 const productStore = useProductStore();
+const userStore = useUserStore();
 
 const selectedCategory = ref("");
 const searchQuery = ref("");
@@ -105,6 +107,7 @@ const currentPage = ref(1);
 let searchTimeout = null;
 
 const categories = computed(() => productStore.categories);
+const userGender = computed(() => userStore.gender || "male");
 
 onMounted(async () => {
   await productStore.fetchCategories();
@@ -123,6 +126,7 @@ const loadProducts = async () => {
     limit: 20,
     sort: sortBy.value,
     order: sortOrder.value,
+    gender: userGender.value, // 添加性别参数
   };
 
   if (selectedCategory.value) {

@@ -569,7 +569,6 @@ const submitOrder = async () => {
 
   .order-sidebar {
     position: static;
-    order: -1;
   }
 }
 

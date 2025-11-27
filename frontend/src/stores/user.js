@@ -6,6 +6,7 @@ import { useCartStore } from './cart'
 export const useUserStore = defineStore('user', () => {
   const user = ref(null)
   const token = ref(localStorage.getItem('token') || null)
+  const gender = ref(localStorage.getItem('user_gender') || 'male')
 
   const isAuthenticated = computed(() => !!token.value)
 
@@ -113,7 +114,10 @@ export const useUserStore = defineStore('user', () => {
   // 手机号登录/注册
   const phoneLogin = async (credentials) => {
     try {
-      const response = await authAPI.phoneLogin(credentials)
+      const response = await authAPI.phoneLogin({
+        ...credentials,
+        gender: gender.value, // 携带性别信息
+      })
       const { access_token, user: userData } = response.data
 
       token.value = access_token
@@ -144,17 +148,25 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  // 设置性别
+  const setGender = (value) => {
+    gender.value = value
+    localStorage.setItem('user_gender', value)
+  }
+
   // 初始化
   init()
 
   return {
     user,
     token,
+    gender,
     isAuthenticated,
     login,
     register,
     logout,
     fetchProfile,
     phoneLogin,
+    setGender,
   }
 })
