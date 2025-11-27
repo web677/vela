@@ -1,20 +1,27 @@
 <template>
-  <div class="product-detail-page">
-    <Loading v-if="productStore.loading" text="加载中..." />
-    
-    <div v-else-if="product" class="product-detail">
-      <!-- Product Images -->
+  <div class="luxury-product-detail">
+    <div v-if="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+    </div>
+
+    <div v-else-if="product" class="product-layout">
+      <!-- Image Gallery -->
       <div class="product-gallery">
-        <div class="main-image">
+        <div class="gallery-main">
           <img :src="currentImage" :alt="product.name" />
         </div>
-        <div v-if="product.images && product.images.length > 1" class="thumbnail-list">
-          <div 
-            v-for="(image, index) in product.images" 
+        <div
+          v-if="product.images && product.images.length > 1"
+          class="gallery-thumbnails"
+        >
+          <div
+            v-for="(image, index) in product.images"
             :key="index"
-            class="thumbnail"
-            :class="{ active: currentImage === image.url }"
-            @click="currentImage = image.url"
+            :class="[
+              'gallery-thumbnail',
+              { active: currentImageIndex === index },
+            ]"
+            @click="selectImage(index)"
           >
             <img :src="image.url" :alt="image.alt" />
           </div>
@@ -22,13 +29,13 @@
       </div>
 
       <!-- Product Info -->
-      <div class="product-info-section">
-        <h1 class="product-title">{{ product.name }}</h1>
-        
-        <div class="product-meta">
-          <span class="meta-item">分类：{{ product.category?.name }}</span>
-          <span class="meta-item">浏览：{{ product.view_count }}</span>
-          <span class="meta-item">销量：{{ product.sales_count }}</span>
+      <div class="product-info">
+        <div class="product-header">
+          <h1 class="product-title">{{ product.name }}</h1>
+          <div class="product-badges">
+            <VBadge v-if="product.is_featured" variant="info">推荐</VBadge>
+            <VBadge v-if="hasDiscount" variant="warning">特惠</VBadge>
+          </div>
         </div>
 
         <div class="product-price-section">
@@ -39,302 +46,340 @@
         </div>
 
         <div class="product-stock">
-          <span v-if="product.stock > 0" class="in-stock">
-            库存：{{ product.stock }} 件
-          </span>
-          <span v-else class="out-of-stock">已售罄</span>
+          <span v-if="product.stock > 0" class="stock-available">有货</span>
+          <span v-else class="stock-out">售罄</span>
         </div>
+
+        <div class="divider"></div>
+
+        <p v-if="product.description" class="product-description">
+          {{ product.description }}
+        </p>
 
         <div class="product-actions">
           <div class="quantity-selector">
-            <button @click="decreaseQuantity" :disabled="quantity <= 1" class="btn btn-secondary">-</button>
-            <input v-model.number="quantity" type="number" min="1" :max="product.stock" class="quantity-input" />
-            <button @click="increaseQuantity" :disabled="quantity >= product.stock" class="btn btn-secondary">+</button>
+            <label class="quantity-label">数量</label>
+            <div class="quantity-controls">
+              <button
+                @click="decreaseQuantity"
+                :disabled="quantity <= 1"
+                class="qty-btn"
+              >
+                −
+              </button>
+              <input
+                v-model.number="quantity"
+                type="number"
+                min="1"
+                :max="product.stock"
+                class="qty-input"
+              />
+              <button
+                @click="increaseQuantity"
+                :disabled="quantity >= product.stock"
+                class="qty-btn"
+              >
+                +
+              </button>
+            </div>
           </div>
 
-          <button 
-            @click="addToCart" 
-            :disabled="product.stock === 0 || loading"
-            class="btn btn-primary btn-lg add-to-cart-btn"
+          <VButton
+            variant="primary"
+            size="lg"
+            block
+            :loading="addingToCart"
+            :disabled="product.stock === 0"
+            @click="addToCart"
           >
-            {{ product.stock === 0 ? '已售罄' : '加入购物车' }}
-          </button>
-        </div>
-
-        <div class="product-description">
-          <h3>产品详情</h3>
-          <p>{{ product.description || product.short_description }}</p>
-        </div>
-
-        <div v-if="product.specifications" class="product-specs">
-          <h3>产品规格</h3>
-          <table>
-            <tr v-for="(value, key) in product.specifications" :key="key">
-              <td class="spec-label">{{ key }}</td>
-              <td class="spec-value">{{ value }}</td>
-            </tr>
-          </table>
+            {{ product.stock === 0 ? "售罄" : "加入购物车" }}
+          </VButton>
         </div>
       </div>
-    </div>
-
-    <div v-else class="not-found">
-      <p>产品不存在</p>
-      <router-link to="/products" class="btn btn-primary">返回产品列表</router-link>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { useRoute } from 'vue-router'
-import { useProductStore } from '@/stores/product'
-import { useCartStore } from '@/stores/cart'
-import { useNotification } from '@/composables/useNotification'
-import { formatPrice } from '@/utils/format'
-import Loading from '@/components/common/Loading.vue'
+import { ref, computed, onMounted } from "vue";
+import { useRoute } from "vue-router";
+import { useProductStore } from "@/stores/product";
+import { useCartStore } from "@/stores/cart";
+import { useNotification } from "@/composables/useNotification";
+import { formatPrice } from "@/utils/format";
+import { VButton, VBadge } from "@/components/ui";
 
-const route = useRoute()
-const productStore = useProductStore()
-const cartStore = useCartStore()
-const notification = useNotification()
+const route = useRoute();
+const productStore = useProductStore();
+const cartStore = useCartStore();
+const notification = useNotification();
 
-const product = computed(() => productStore.currentProduct)
-const currentImage = ref('')
-const quantity = ref(1)
-const loading = ref(false)
+const loading = ref(true);
+const addingToCart = ref(false);
+const currentImageIndex = ref(0);
+const quantity = ref(1);
 
-onMounted(async () => {
-  const productId = route.params.id
-  const result = await productStore.fetchProduct(productId)
-  
-  if (result && result.images && result.images.length > 0) {
-    currentImage.value = result.images[0].url
+const product = computed(() => productStore.currentProduct);
+const currentImage = computed(() => {
+  if (product.value?.images?.[currentImageIndex.value]) {
+    return product.value.images[currentImageIndex.value].url;
   }
-})
+  return "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=1200&q=80";
+});
 
-const increaseQuantity = () => {
-  if (quantity.value < product.value.stock) {
-    quantity.value++
-  }
-}
+const hasDiscount = computed(() => {
+  return (
+    product.value?.original_price &&
+    product.value.original_price > product.value.price
+  );
+});
+
+const selectImage = (index) => {
+  currentImageIndex.value = index;
+};
 
 const decreaseQuantity = () => {
-  if (quantity.value > 1) {
-    quantity.value--
-  }
-}
+  if (quantity.value > 1) quantity.value--;
+};
+
+const increaseQuantity = () => {
+  if (quantity.value < product.value.stock) quantity.value++;
+};
 
 const addToCart = async () => {
-  loading.value = true
-  const result = await cartStore.addToCart(product.value.id, quantity.value)
-  loading.value = false
-  
+  addingToCart.value = true;
+  const result = await cartStore.addToCart(product.value.id, quantity.value);
+  addingToCart.value = false;
+
   if (result.success) {
-    notification.success('已加入购物车！')
-    quantity.value = 1
+    notification.success("已加入购物车");
+    quantity.value = 1;
   } else {
-    notification.error(result.message || '添加失败')
+    notification.error(result.message || "添加失败");
   }
-}
+};
+
+onMounted(async () => {
+  loading.value = true;
+  await productStore.fetchProduct(route.params.id);
+  loading.value = false;
+});
 </script>
 
 <style scoped>
-.product-detail {
+.luxury-product-detail {
+  padding-top: 80px;
+  min-height: 100vh;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+}
+
+.product-layout {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: var(--spacing-4xl) var(--container-padding);
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 3rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  gap: var(--spacing-6xl);
 }
 
 .product-gallery {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  position: sticky;
+  top: 120px;
+  align-self: start;
 }
 
-.main-image {
+.gallery-main {
   width: 100%;
-  aspect-ratio: 1;
-  border-radius: var(--radius-lg);
+  aspect-ratio: 3/4;
+  margin-bottom: var(--spacing-lg);
+  background-color: var(--color-bg-secondary);
   overflow: hidden;
-  background: var(--color-surface);
 }
 
-.main-image img {
+.gallery-main img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.thumbnail-list {
+.gallery-thumbnails {
   display: flex;
-  gap: 0.75rem;
+  gap: var(--spacing-md);
   overflow-x: auto;
 }
 
-.thumbnail {
+.gallery-thumbnail {
+  flex-shrink: 0;
   width: 80px;
-  height: 80px;
-  border-radius: var(--radius-md);
-  overflow: hidden;
+  height: 100px;
   cursor: pointer;
   border: 2px solid transparent;
-  transition: border-color var(--transition-base);
+  transition: var(--transition-base);
+  overflow: hidden;
 }
 
-.thumbnail.active {
-  border-color: var(--color-primary);
+.gallery-thumbnail.active {
+  border-color: var(--color-ebony);
 }
 
-.thumbnail img {
+.gallery-thumbnail img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.product-info-section {
+.product-info {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--spacing-xl);
+}
+
+.product-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
 }
 
 .product-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
+  font-family: var(--font-family-elegant);
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-ebony);
   margin: 0;
 }
 
-.product-meta {
+.product-badges {
   display: flex;
-  gap: 2rem;
-  color: var(--color-text-secondary);
-  font-size: 0.9375rem;
+  gap: var(--spacing-sm);
 }
 
 .product-price-section {
   display: flex;
   align-items: baseline;
-  gap: 1rem;
+  gap: var(--spacing-md);
 }
 
 .price-current {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: var(--color-primary);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-ebony);
 }
 
 .price-original {
-  font-size: 1.25rem;
+  font-size: var(--font-size-lg);
   color: var(--color-text-muted);
   text-decoration: line-through;
 }
 
 .product-stock {
-  font-size: 1rem;
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider);
 }
 
-.in-stock {
+.stock-available {
   color: var(--color-success);
 }
 
-.out-of-stock {
+.stock-out {
   color: var(--color-error);
+}
+
+.product-description {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-secondary);
 }
 
 .product-actions {
   display: flex;
-  gap: 1rem;
-  align-items: center;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-xl);
 }
 
 .quantity-selector {
   display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.quantity-label {
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider);
+  color: var(--color-text-secondary);
+}
+
+.quantity-controls {
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 0.25rem;
+  gap: var(--spacing-md);
+  max-width: 200px;
 }
 
-.quantity-selector button {
-  width: 36px;
-  height: 36px;
-  padding: 0;
-}
-
-.quantity-input {
-  width: 60px;
-  text-align: center;
-  border: none;
-  background: transparent;
+.qty-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--color-border-default);
   color: var(--color-text-primary);
-  font-size: 1rem;
-  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-base);
+  font-size: var(--font-size-lg);
 }
 
-.add-to-cart-btn {
+.qty-btn:hover:not(:disabled) {
+  border-color: var(--color-ebony);
+}
+
+.qty-btn:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+.qty-input {
   flex: 1;
-}
-
-.product-description h3,
-.product-specs h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: var(--color-text-primary);
-}
-
-.product-description p {
-  color: var(--color-text-secondary);
-  line-height: 1.8;
-}
-
-.product-specs table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.product-specs tr {
-  border-bottom: 1px solid var(--color-border);
-}
-
-.spec-label {
-  padding: 0.75rem 0;
-  color: var(--color-text-secondary);
-  width: 30%;
-}
-
-.spec-value {
-  padding: 0.75rem 0;
-  color: var(--color-text-primary);
-  font-weight: 500;
-}
-
-.not-found {
+  height: 44px;
   text-align: center;
-  padding: 4rem 2rem;
+  border: 1px solid var(--color-border-light);
+  background: none;
+  font-size: var(--font-size-lg);
+  -moz-appearance: textfield;
 }
 
-.not-found p {
-  font-size: 1.25rem;
-  color: var(--color-text-secondary);
-  margin-bottom: 2rem;
+.qty-input::-webkit-inner-spin-button,
+.qty-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+
+@media (max-width: 1024px) {
+  .product-layout {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-3xl);
+  }
+
+  .product-gallery {
+    position: static;
+  }
 }
 
 @media (max-width: 768px) {
-  .product-detail {
-    grid-template-columns: 1fr;
+  .luxury-product-detail {
+    padding-top: 64px;
   }
 
-  .product-actions {
-    flex-direction: column;
-  }
-
-  .add-to-cart-btn {
-    width: 100%;
+  .product-title {
+    font-size: var(--font-size-3xl);
   }
 }
 </style>

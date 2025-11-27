@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authAPI } from '@/api/auth'
+import { useCartStore } from './cart'
 
 export const useUserStore = defineStore('user', () => {
   const user = ref(null)
@@ -27,6 +28,10 @@ export const useUserStore = defineStore('user', () => {
 
       localStorage.setItem('token', access_token)
       localStorage.setItem('user', JSON.stringify(userData))
+
+      // 同步购物车
+      const cartStore = useCartStore()
+      cartStore.fetchCart()
 
       return { success: true }
     } catch (error) {
@@ -59,6 +64,10 @@ export const useUserStore = defineStore('user', () => {
       localStorage.setItem('token', access_token)
       localStorage.setItem('user', JSON.stringify(userData))
 
+      // 同步购物车
+      const cartStore = useCartStore()
+      cartStore.fetchCart()
+
       return { success: true }
     } catch (error) {
       console.error('Register error:', error)
@@ -83,6 +92,10 @@ export const useUserStore = defineStore('user', () => {
     token.value = null
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    
+    // 清空购物车
+    const cartStore = useCartStore()
+    cartStore.clearCart()
   }
 
   // 获取用户信息
@@ -108,6 +121,10 @@ export const useUserStore = defineStore('user', () => {
 
       localStorage.setItem('token', access_token)
       localStorage.setItem('user', JSON.stringify(userData))
+
+      // 同步购物车
+      const cartStore = useCartStore()
+      cartStore.fetchCart()
 
       return { success: true }
     } catch (error) {

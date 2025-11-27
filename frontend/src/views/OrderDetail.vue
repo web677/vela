@@ -1,28 +1,33 @@
 <template>
   <div class="order-detail-page">
-    <Loading v-if="orderStore.loading" text="加载中..." />
+    <div v-if="orderStore.loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>加载中...</p>
+    </div>
 
     <div v-else-if="order" class="order-detail">
-      <div class="order-header card">
-        <h1 class="page-title">订单详情</h1>
-        
+      <!-- 订单头部 -->
+      <VCard class="order-header" padding="xl">
+        <div class="header-content">
+          <div>
+            <h1 class="page-title">订单详情</h1>
+            <p class="order-number">订单号：{{ order.order_number }}</p>
+          </div>
+          <VBadge :variant="getStatusVariant(order.status)" size="lg">
+            {{ getOrderStatusText(order.status) }}
+          </VBadge>
+        </div>
+
         <div class="order-summary">
-          <div class="summary-item">
-            <span class="label">订单号</span>
-            <span class="value">{{ order.order_number }}</span>
-          </div>
-          <div class="summary-item">
-            <span class="label">订单状态</span>
-            <span 
-              class="badge"
-              :style="{ background: getStatusColor(order.status) }"
-            >
-              {{ getOrderStatusText(order.status) }}
-            </span>
-          </div>
           <div class="summary-item">
             <span class="label">下单时间</span>
             <span class="value">{{ formatDate(order.created_at) }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">支付方式</span>
+            <span class="value">{{
+              getPaymentMethod(order.payment_method)
+            }}</span>
           </div>
           <div class="summary-item">
             <span class="label">订单总额</span>
@@ -30,41 +35,46 @@
           </div>
         </div>
 
-        <button 
+        <VButton
           v-if="order.status === 'pending'"
+          variant="secondary"
           @click="cancelOrder"
-          class="btn btn-secondary"
         >
           取消订单
-        </button>
-      </div>
+        </VButton>
+      </VCard>
 
-      <!-- Order Items -->
-      <div class="order-items card">
-        <h3>订单商品</h3>
+      <!-- 订单商品 -->
+      <VCard class="order-items" padding="xl">
+        <h3 class="section-title">订单商品</h3>
         <div class="items-list">
           <div v-for="item in order.items" :key="item.id" class="order-item">
-            <img 
-              :src="item.product_snapshot.image || '/placeholder.jpg'" 
-              :alt="item.product_snapshot.name" 
+            <img
+              :src="item.product_snapshot.image || '/placeholder.jpg'"
+              :alt="item.product_snapshot.name"
             />
             <div class="item-info">
               <p class="item-name">{{ item.product_snapshot.name }}</p>
               <p class="item-specs" v-if="item.product_snapshot.specifications">
-                {{ Object.values(item.product_snapshot.specifications).join(' / ') }}
+                {{
+                  Object.values(item.product_snapshot.specifications).join(
+                    " / "
+                  )
+                }}
               </p>
+              <p class="item-quantity">x{{ item.quantity }}</p>
             </div>
             <div class="item-price">
-              <p>{{ formatPrice(item.price) }} x {{ item.quantity }}</p>
+              <p class="unit-price">{{ formatPrice(item.price) }}</p>
               <p class="subtotal">{{ formatPrice(item.subtotal) }}</p>
             </div>
           </div>
         </div>
-      </div>
+      </VCard>
 
-      <!-- Shipping Address -->
-      <div class="shipping-info card">
-        <h3>收货信息</h3>
+      <!-- 收货信息 -->
+      <VCard class="shipping-info" padding="xl">
+        <h3 class="section-title">收货信息</h3>
         <div class="info-grid">
           <div class="info-item">
             <span class="label">收货人</span>
@@ -84,11 +94,11 @@
             </span>
           </div>
         </div>
-      </div>
+      </VCard>
 
-      <!-- Contact Info -->
-      <div class="contact-info card">
-        <h3>联系信息</h3>
+      <!-- 联系信息 -->
+      <VCard class="contact-info" padding="xl">
+        <h3 class="section-title">联系信息</h3>
         <div class="info-grid">
           <div class="info-item">
             <span class="label">联系人</span>
@@ -103,139 +113,201 @@
             <span class="value">{{ order.contact_info.email }}</span>
           </div>
         </div>
-      </div>
+      </VCard>
+
+      <!-- 备注 -->
+      <VCard v-if="order.notes" class="order-notes" padding="xl">
+        <h3 class="section-title">订单备注</h3>
+        <p class="notes-content">{{ order.notes }}</p>
+      </VCard>
     </div>
 
     <div v-else class="not-found">
-      <p>订单不存在</p>
-      <router-link to="/orders" class="btn btn-primary">返回订单列表</router-link>
+      <div class="not-found-icon">🔍</div>
+      <h2>订单不存在</h2>
+      <p>抱歉，该订单不存在或已被删除</p>
+      <VButton variant="primary" @click="$router.push('/orders')">
+        返回订单列表
+      </VButton>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useOrderStore } from '@/stores/order'
-import { useNotification } from '@/composables/useNotification'
-import { useConfirm } from '@/composables/useConfirm'
-import { formatPrice, formatDate, getOrderStatusText, getOrderStatusColor } from '@/utils/format'
-import Loading from '@/components/common/Loading.vue'
+import { onMounted, computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useOrderStore } from "@/stores/order";
+import { useNotification } from "@/composables/useNotification";
+import { useConfirm } from "@/composables/useConfirm";
+import { formatPrice, formatDate, getOrderStatusText } from "@/utils/format";
+import { VButton, VCard, VBadge } from "@/components/ui";
 
-const route = useRoute()
-const router = useRouter()
-const orderStore = useOrderStore()
-const notification = useNotification()
-const { confirm } = useConfirm()
+const route = useRoute();
+const router = useRouter();
+const orderStore = useOrderStore();
+const notification = useNotification();
+const confirm = useConfirm();
 
-const order = computed(() => orderStore.currentOrder)
+const order = computed(() => orderStore.currentOrder);
 
 onMounted(() => {
-  const orderId = route.params.id
-  orderStore.fetchOrder(orderId)
-})
+  const orderId = route.params.id;
+  orderStore.fetchOrder(orderId);
+});
 
-const getStatusColor = (status) => {
-  return getOrderStatusColor(status)
-}
+const getStatusVariant = (status) => {
+  const statusMap = {
+    pending: "warning",
+    paid: "info",
+    shipped: "info",
+    delivered: "success",
+    cancelled: "error",
+    refunded: "error",
+  };
+  return statusMap[status] || "default";
+};
+
+const getPaymentMethod = (method) => {
+  const methodMap = {
+    alipay: "支付宝",
+    wechat: "微信支付",
+    bank_card: "银行卡",
+  };
+  return methodMap[method] || method;
+};
 
 const cancelOrder = async () => {
-  const confirmed = await confirm('确定要取消这个订单吗？', '取消订单')
+  const confirmed = await confirm.show("确定要取消这个订单吗？");
   if (confirmed) {
-    const result = await orderStore.cancelOrder(order.value.id)
+    const result = await orderStore.cancelOrder(order.value.id);
     if (result.success) {
-      notification.success('订单已取消')
-      await orderStore.fetchOrder(order.value.id)
+      notification.success("订单已取消");
+      await orderStore.fetchOrder(order.value.id);
     } else {
-      notification.error(result.message || '取消失败')
+      notification.error(result.message || "取消失败");
     }
   }
-}
+};
 </script>
 
 <style scoped>
 .order-detail-page {
-  max-width: 1000px;
+  max-width: var(--container-max-width);
   margin: 0 auto;
+  padding: var(--spacing-2xl) var(--spacing-lg);
+  min-height: 70vh;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-4xl) 0;
+  color: var(--color-text-muted);
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-border-light);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: var(--spacing-md);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .order-detail {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: var(--spacing-xl);
 }
 
-.order-header {
-  padding: 2rem;
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-xl);
 }
 
 .page-title {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.order-number {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0;
 }
 
 .order-summary {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-xl);
+  padding: var(--spacing-lg) 0;
+  margin-bottom: var(--spacing-lg);
+  border-top: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .summary-item {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--spacing-xs);
 }
 
 .label {
-  font-size: 0.9375rem;
-  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
 }
 
 .value {
-  font-size: 1.125rem;
+  font-size: var(--font-size-base);
   color: var(--color-text-primary);
-  font-weight: 600;
-}
-
-.badge {
-  display: inline-block;
-  padding: 0.375rem 1rem;
-  border-radius: var(--radius-md);
-  color: white;
-  font-size: 0.875rem;
-  font-weight: 600;
-  width: fit-content;
+  font-weight: var(--font-weight-medium);
 }
 
 .amount {
-  font-size: 1.75rem;
-  font-weight: 800;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
   color: var(--color-primary);
 }
 
-.order-items h3,
-.shipping-info h3,
-.contact-info h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
+.section-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-lg) 0;
 }
 
 .items-list {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--spacing-lg);
 }
 
 .order-item {
   display: grid;
   grid-template-columns: 100px 1fr auto;
-  gap: 1.5rem;
-  align-items: center;
+  gap: var(--spacing-lg);
+  align-items: start;
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.order-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .order-item img {
@@ -249,67 +321,121 @@ const cancelOrder = async () => {
 .item-info {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--spacing-xs);
 }
 
 .item-name {
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   margin: 0;
 }
 
 .item-specs {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.item-quantity {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
   margin: 0;
 }
 
 .item-price {
   text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
 }
 
-.item-price p {
+.unit-price {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
   margin: 0;
-  color: var(--color-text-secondary);
 }
 
 .subtotal {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--color-text-primary) !important;
-  margin-top: 0.5rem;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
 }
 
 .info-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
+  gap: var(--spacing-lg);
 }
 
 .info-item {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--spacing-xs);
 }
 
 .info-item.full-width {
   grid-column: 1 / -1;
 }
 
+.notes-content {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+  padding: var(--spacing-md);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-sm);
+}
+
 .not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-4xl) var(--spacing-lg);
   text-align: center;
-  padding: 4rem 2rem;
+  min-height: 50vh;
+}
+
+.not-found-icon {
+  font-size: 5rem;
+  margin-bottom: var(--spacing-xl);
+  opacity: 0.5;
+}
+
+.not-found h2 {
+  font-size: var(--font-size-2xl);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-md) 0;
 }
 
 .not-found p {
-  font-size: 1.25rem;
+  font-size: var(--font-size-base);
   color: var(--color-text-secondary);
-  margin-bottom: 2rem;
+  margin: 0 0 var(--spacing-2xl) 0;
 }
 
 @media (max-width: 768px) {
-  .order-summary,
+  .order-detail-page {
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+
+  .page-title {
+    font-size: var(--font-size-2xl);
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .order-summary {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
   .info-grid {
     grid-template-columns: 1fr;
   }
@@ -319,9 +445,11 @@ const cancelOrder = async () => {
   }
 
   .item-price {
-    grid-column: 2;
+    grid-column: 1 / -1;
     text-align: left;
-    margin-top: 0.5rem;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-top: var(--spacing-sm);
   }
 }
 </style>

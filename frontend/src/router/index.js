@@ -8,7 +8,9 @@ import Checkout from '@/views/Checkout.vue'
 import Login from '@/views/Login.vue'
 import OrderList from '@/views/OrderList.vue'
 import OrderDetail from '@/views/OrderDetail.vue'
+import SeriesList from '@/views/series/SeriesList.vue'
 import SeriesDetail from '@/views/series/SeriesDetail.vue'
+import UIDemo from '@/views/UIDemo.vue'
 
 const routes = [
   {
@@ -16,6 +18,18 @@ const routes = [
     name: 'Home',
     component: Home,
     meta: { title: '首页' }
+  },
+  {
+    path: '/ui-demo',
+    name: 'UIDemo',
+    component: UIDemo,
+    meta: { title: 'UI 组件演示' }
+  },
+  {
+    path: '/series',
+    name: 'SeriesList',
+    component: SeriesList,
+    meta: { title: '系列' }
   },
   {
     path: '/series/:slug',

@@ -10,7 +10,7 @@ export class SupabaseService {
   constructor(private configService: ConfigService) {
     const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
     const supabaseKey = this.configService.get<string>('SUPABASE_ANON_KEY');
-    const supabaseServiceKey = this.configService.get<string>('SUPABASE_SERVICE_KEY');
+    const supabaseServiceKey = this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY');
 
     if (!supabaseUrl || !supabaseKey) {
       throw new Error('Supabase URL and ANON KEY must be provided');

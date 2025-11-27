@@ -1,302 +1,357 @@
 <template>
-  <div class="cart-page">
-    <h1 class="page-title">购物车</h1>
+  <div class="luxury-cart">
+    <div class="container container-wide">
+      <h1 class="page-title">购物车</h1>
 
-    <Loading v-if="cartStore.loading" text="加载中..." />
+      <div v-if="loading" class="loading-container">
+        <div class="loading-spinner"></div>
+      </div>
 
-    <div v-else-if="cartStore.items.length > 0" class="cart-content">
-      <div class="cart-items">
-        <div v-for="item in cartStore.items" :key="item.id" class="cart-item card">
-          <div class="item-image">
-            <img :src="item.product.images[0]?.url || '/placeholder.jpg'" :alt="item.product.name" />
-          </div>
+      <div v-else-if="cartStore.items.length > 0" class="cart-layout">
+        <div class="cart-items">
+          <VCard
+            v-for="item in cartStore.items"
+            :key="item.id"
+            class="cart-item"
+            padding="lg"
+          >
+            <img
+              :src="
+                item.product.images[0]?.url ||
+                'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400&q=80'
+              "
+              :alt="item.product.name"
+              class="item-image"
+            />
 
-          <div class="item-info">
-            <h3 class="item-name">{{ item.product.name }}</h3>
-            <p class="item-price">{{ formatPrice(item.product.price) }}</p>
-          </div>
+            <div class="item-details">
+              <h3 class="item-name">{{ item.product.name }}</h3>
+              <p class="item-price">{{ formatPrice(item.product.price) }}</p>
+            </div>
 
-          <div class="item-quantity">
-            <button @click="updateQuantity(item, item.quantity - 1)" :disabled="item.quantity <= 1" class="btn btn-secondary btn-sm">
-              -
-            </button>
-            <span class="quantity-display">{{ item.quantity }}</span>
-            <button @click="updateQuantity(item, item.quantity + 1)" :disabled="item.quantity >= item.product.stock" class="btn btn-secondary btn-sm">
-              +
-            </button>
-          </div>
+            <div class="item-actions">
+              <div class="qty-controls">
+                <button
+                  @click="updateQty(item, item.quantity - 1)"
+                  :disabled="item.quantity <= 1"
+                  class="qty-btn"
+                >
+                  −
+                </button>
+                <span class="qty-display">{{ item.quantity }}</span>
+                <button
+                  @click="updateQty(item, item.quantity + 1)"
+                  :disabled="item.quantity >= item.product.stock"
+                  class="qty-btn"
+                >
+                  +
+                </button>
+              </div>
 
-          <div class="item-subtotal">
-            <span>{{ formatPrice(item.subtotal) }}</span>
-          </div>
+              <span class="item-subtotal">{{
+                formatPrice(item.subtotal)
+              }}</span>
 
-          <button @click="removeItem(item.id)" class="btn-remove" title="删除">
-            <span>&times;</span>
-          </button>
+              <button @click="removeItem(item.id)" class="remove-btn">
+                删除
+              </button>
+            </div>
+          </VCard>
+        </div>
+
+        <div class="cart-summary">
+          <VCard padding="xl">
+            <h3 class="summary-title">订单摘要</h3>
+
+            <div class="summary-rows">
+              <div class="summary-row">
+                <span>商品数量</span>
+                <span>{{ cartStore.totalItems }} 件</span>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="summary-row summary-total">
+                <span>总计</span>
+                <span class="total-amount">{{
+                  formatPrice(cartStore.totalAmount)
+                }}</span>
+              </div>
+            </div>
+
+            <VButton
+              variant="primary"
+              size="lg"
+              block
+              @click="$router.push('/checkout')"
+            >
+              结算
+            </VButton>
+          </VCard>
         </div>
       </div>
 
-      <div class="cart-summary card">
-        <h3>订单摘要</h3>
-        
-        <div class="summary-row">
-          <span>商品总数</span>
-          <span>{{ cartStore.totalItems }} 件</span>
-        </div>
-
-        <div class="summary-row summary-total">
-          <span>总计</span>
-          <span class="total-amount">{{ formatPrice(cartStore.totalAmount) }}</span>
-        </div>
-
-        <button @click="goToCheckout" class="btn btn-primary btn-lg btn-block">
-          去结算
-        </button>
-
-        <button @click="clearCart" class="btn btn-secondary btn-block">
-          清空购物车
-        </button>
+      <div v-else class="empty-state">
+        <div class="empty-icon">🛒</div>
+        <h2>购物车是空的</h2>
+        <p>还没有添加商品</p>
+        <VButton variant="primary" @click="$router.push('/products')">
+          去选购
+        </VButton>
       </div>
-    </div>
-
-    <div v-else class="empty-cart">
-      <p>购物车是空的</p>
-      <router-link to="/products" class="btn btn-primary">去选购</router-link>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useCartStore } from '@/stores/cart'
-import { useNotification } from '@/composables/useNotification'
-import { useConfirm } from '@/composables/useConfirm'
-import { formatPrice } from '@/utils/format'
-import Loading from '@/components/common/Loading.vue'
+import { ref, onMounted } from "vue";
+import { useCartStore } from "@/stores/cart";
+import { useNotification } from "@/composables/useNotification";
+import { formatPrice } from "@/utils/format";
+import { VButton, VCard } from "@/components/ui";
 
-const router = useRouter()
-const cartStore = useCartStore()
-const notification = useNotification()
-const { confirmDelete } = useConfirm()
+const cartStore = useCartStore();
+const notification = useNotification();
+const loading = ref(true);
 
-onMounted(() => {
-  cartStore.fetchCart()
-})
+onMounted(async () => {
+  await cartStore.fetchCart();
+  loading.value = false;
+});
 
-const updateQuantity = async (item, newQuantity) => {
-  if (newQuantity < 1 || newQuantity > item.product.stock) return
-  
-  const result = await cartStore.updateCartItem(item.id, newQuantity)
-  if (!result.success) {
-    notification.error(result.message || '更新失败')
-  }
-}
+const updateQty = async (item, newQty) => {
+  if (newQty < 1 || newQty > item.product.stock) return;
+  await cartStore.updateCartItem(item.id, newQty);
+};
 
 const removeItem = async (itemId) => {
-  const confirmed = await confirmDelete('确定要删除这个商品吗？')
-  if (confirmed) {
-    const result = await cartStore.removeCartItem(itemId)
-    if (!result.success) {
-      notification.error(result.message || '删除失败')
-    }
+  const result = await cartStore.removeFromCart(itemId);
+  if (result.success) {
+    notification.success("已删除");
   }
-}
-
-const clearCart = async () => {
-  const confirmed = await confirmDelete('确定要清空购物车吗？此操作无法撤销。')
-  if (confirmed) {
-    const result = await cartStore.clearCart()
-    if (!result.success) {
-      notification.error(result.message || '清空失败')
-    }
-  }
-}
-
-const goToCheckout = () => {
-  router.push('/checkout')
-}
+};
 </script>
 
 <style scoped>
-.cart-page {
-  max-width: 1200px;
-  margin: 0 auto;
+.luxury-cart {
+  padding-top: 120px;
+  min-height: 100vh;
+  padding-bottom: var(--spacing-6xl);
 }
 
 .page-title {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
-  color: var(--color-text-primary);
+  font-family: var(--font-family-elegant);
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-regular);
+  text-align: center;
+  margin-bottom: var(--spacing-4xl);
 }
 
-.cart-content {
+.cart-layout {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 2rem;
+  gap: var(--spacing-3xl);
   align-items: start;
 }
 
 .cart-items {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--spacing-lg);
 }
 
 .cart-item {
-  display: grid;
-  grid-template-columns: 100px 1fr auto auto auto;
-  gap: 1.5rem;
+  display: block !important;
+}
+
+.cart-item :deep(.luxury-card) {
+  display: grid !important;
+  grid-template-columns: 120px 1fr auto;
+  gap: var(--spacing-xl);
   align-items: center;
-  position: relative;
 }
 
 .item-image {
-  width: 100px;
-  height: 100px;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--color-bg-tertiary);
-}
-
-.item-image img {
-  width: 100%;
-  height: 100%;
+  width: 120px;
+  height: 150px;
   object-fit: cover;
+  background-color: var(--color-bg-secondary);
 }
 
-.item-info {
+.item-details {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--spacing-sm);
 }
 
 .item-name {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-ebony);
   margin: 0;
 }
 
 .item-price {
-  font-size: 1rem;
-  color: var(--color-primary);
-  font-weight: 600;
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
-.item-quantity {
+.item-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  align-items: flex-end;
+}
+
+.qty-controls {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 0.25rem 0.5rem;
+  gap: var(--spacing-sm);
 }
 
-.btn-sm {
+.qty-btn {
   width: 32px;
   height: 32px;
-  padding: 0;
-  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--color-border-default);
+  cursor: pointer;
+  transition: var(--transition-base);
 }
 
-.quantity-display {
-  min-width: 30px;
+.qty-btn:hover:not(:disabled) {
+  border-color: var(--color-ebony);
+}
+
+.qty-display {
+  min-width: 40px;
   text-align: center;
-  font-weight: 600;
-  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
 }
 
 .item-subtotal {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-ebony);
 }
 
-.btn-remove {
+.remove-btn {
   background: none;
   border: none;
   color: var(--color-text-muted);
-  font-size: 2rem;
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wider);
   cursor: pointer;
-  line-height: 1;
-  transition: color var(--transition-base);
+  transition: var(--transition-base);
 }
 
-.btn-remove:hover {
+.remove-btn:hover {
   color: var(--color-error);
 }
 
 .cart-summary {
   position: sticky;
-  top: 5rem;
+  top: 120px;
 }
 
-.cart-summary h3 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-  color: var(--color-text-primary);
+.summary-title {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-ebony);
+  margin: 0 0 var(--spacing-xl) 0;
+}
+
+.summary-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
 }
 
 .summary-row {
   display: flex;
   justify-content: space-between;
-  padding: 0.75rem 0;
+  align-items: center;
+  font-size: var(--font-size-base);
   color: var(--color-text-secondary);
 }
 
 .summary-total {
-  border-top: 2px solid var(--color-border);
-  margin-top: 1rem;
-  padding-top: 1.5rem;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--color-text-primary);
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  font-size: var(--font-size-lg);
+  color: var(--color-ebony);
 }
 
 .total-amount {
-  color: var(--color-primary);
-  font-size: 1.75rem;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-ebony);
 }
 
-.btn-block {
-  width: 100%;
-  margin-top: 1rem;
-}
-
-.empty-cart {
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-6xl) 0;
   text-align: center;
-  padding: 4rem 2rem;
 }
 
-.empty-cart p {
-  font-size: 1.25rem;
+.empty-icon {
+  font-size: 5rem;
+  opacity: 0.3;
+  margin-bottom: var(--spacing-xl);
+}
+
+.empty-state h2 {
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-ebony);
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.empty-state p {
   color: var(--color-text-secondary);
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-2xl);
 }
 
-@media (max-width: 968px) {
-  .cart-content {
+@media (max-width: 1024px) {
+  .cart-layout {
     grid-template-columns: 1fr;
   }
 
-  .cart-item {
-    grid-template-columns: 80px 1fr;
-    gap: 1rem;
+  .cart-summary {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .luxury-cart {
+    padding-top: 100px;
   }
 
-  .item-quantity,
-  .item-subtotal {
-    grid-column: 2;
+  .cart-item :deep(.luxury-card) {
+    grid-template-columns: 100px 1fr;
+    gap: var(--spacing-md);
   }
 
-  .btn-remove {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
+  .item-image {
+    width: 100px;
+    height: 125px;
+  }
+
+  .item-actions {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
   }
 }
 </style>

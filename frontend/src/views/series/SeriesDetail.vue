@@ -1,20 +1,20 @@
 <template>
   <div class="series-detail">
     <Loading v-if="loading" />
-    
+
     <div v-else-if="series" class="series-container">
       <!-- Hero Section -->
       <div class="series-hero" :style="{ '--theme-color': series.theme_color }">
         <div class="hero-background">
-          <img 
-            v-if="series.hero_image_url" 
-            :src="series.hero_image_url" 
+          <img
+            v-if="series.hero_image_url"
+            :src="series.hero_image_url"
             :alt="series.name"
             class="hero-image"
           />
           <div class="hero-overlay"></div>
         </div>
-        
+
         <div class="hero-content container">
           <h1 class="series-name font-serif">{{ series.name }}</h1>
           <p class="series-name-en">{{ series.name_en }}</p>
@@ -27,12 +27,14 @@
       <div class="series-products container">
         <div class="section-header">
           <h2>系列产品</h2>
-          <p class="product-count" v-if="products.length">共 {{ totalProducts }} 件商品</p>
+          <p class="product-count" v-if="products.length">
+            共 {{ totalProducts }} 件商品
+          </p>
         </div>
 
         <div v-if="products.length" class="product-grid">
-          <ProductCard 
-            v-for="product in products" 
+          <ProductCard
+            v-for="product in products"
             :key="product.id"
             :product="product"
           />
@@ -40,19 +42,21 @@
 
         <div v-else-if="!productsLoading" class="empty-state">
           <p>该系列暂无商品</p>
-          <router-link to="/products" class="btn btn-primary">浏览全部商品</router-link>
+          <router-link to="/products" class="btn btn-primary"
+            >浏览全部商品</router-link
+          >
         </div>
 
         <!-- Pagination -->
         <div v-if="totalPages > 1" class="pagination">
-          <button 
-            @click="loadPage(currentPage - 1)" 
+          <button
+            @click="loadPage(currentPage - 1)"
             :disabled="currentPage === 1"
             class="btn btn-secondary"
           >
             上一页
           </button>
-          
+
           <div class="page-numbers">
             <button
               v-for="page in paginationRange"
@@ -64,8 +68,8 @@
             </button>
           </div>
 
-          <button 
-            @click="loadPage(currentPage + 1)" 
+          <button
+            @click="loadPage(currentPage + 1)"
             :disabled="currentPage === totalPages"
             class="btn btn-secondary"
           >
@@ -83,75 +87,79 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { useSeriesStore } from '@/stores/series'
-import ProductCard from '@/components/product/ProductCard.vue'
-import Loading from '@/components/common/Loading.vue'
+import { ref, computed, onMounted } from "vue";
+import { useRoute } from "vue-router";
+import { useSeriesStore } from "@/stores/series";
+import ProductCard from "@/components/product/ProductCard.vue";
+import Loading from "@/components/common/Loading.vue";
 
-const route = useRoute()
-const seriesStore = useSeriesStore()
+const route = useRoute();
+const seriesStore = useSeriesStore();
 
-const series = ref(null)
-const products = ref([])
-const loading = ref(true)
-const productsLoading = ref(false)
-const currentPage = ref(1)
-const totalProducts = ref(0)
-const totalPages = ref(1)
-const limit = 20
+const series = ref(null);
+const products = ref([]);
+const loading = ref(true);
+const productsLoading = ref(false);
+const currentPage = ref(1);
+const totalProducts = ref(0);
+const totalPages = ref(1);
+const limit = 20;
 
 const paginationRange = computed(() => {
-  const range = []
-  const delta = 2
-  const left = currentPage.value - delta
-  const right = currentPage.value + delta
+  const range = [];
+  const delta = 2;
+  const left = currentPage.value - delta;
+  const right = currentPage.value + delta;
 
   for (let i = 1; i <= totalPages.value; i++) {
     if (i === 1 || i === totalPages.value || (i >= left && i <= right)) {
-      range.push(i)
-    } else if (range[range.length - 1] !== '...') {
-      range.push('...')
+      range.push(i);
+    } else if (range[range.length - 1] !== "...") {
+      range.push("...");
     }
   }
-  return range
-})
+  return range;
+});
 
 const loadPage = async (page) => {
-  if (page === '...' || page < 1 || page > totalPages.value) return
-  
-  currentPage.value = page
-  productsLoading.value = true
-  
-  const result = await seriesStore.fetchSeriesProducts(route.params.slug, page, limit)
-  
+  if (page === "..." || page < 1 || page > totalPages.value) return;
+
+  currentPage.value = page;
+  productsLoading.value = true;
+
+  const result = await seriesStore.fetchSeriesProducts(
+    series.value.id,
+    page,
+    limit
+  );
+
   if (result.success) {
-    products.value = result.data
-    totalProducts.value = result.total
-    totalPages.value = result.totalPages
+    products.value = result.data;
+    totalProducts.value = result.total;
+    totalPages.value = result.totalPages;
   }
-  
-  productsLoading.value = false
-  
+
+  productsLoading.value = false;
+
   // Scroll to top
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
 
 onMounted(async () => {
-  loading.value = true
-  
+  loading.value = true;
+
   // Fetch series details
-  const seriesResult = await seriesStore.fetchSeriesBySlug(route.params.slug)
-  
+  const seriesResult = await seriesStore.fetchSeriesBySlug(route.params.slug);
+
   if (seriesResult.success) {
-    series.value = seriesResult.data
-    
+    series.value = seriesResult.data;
+
     // Fetch products
-    await loadPage(1)
+    await loadPage(1);
   }
-  
-  loading.value = false
-})
+
+  loading.value = false;
+});
 </script>
 
 <style scoped>

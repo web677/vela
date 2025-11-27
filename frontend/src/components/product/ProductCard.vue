@@ -1,14 +1,39 @@
 <template>
-  <div class="product-card card hover-lift" @click="goToDetail">
-    <div class="product-image">
-      <img :src="product.images[0]?.url || '/placeholder.jpg'" :alt="product.name" />
-      <span v-if="product.is_featured" class="badge-featured">推荐</span>
-      <span v-if="product.stock === 0" class="badge-out-of-stock">售罄</span>
+  <VCard
+    class="luxury-product-card"
+    hoverable
+    clickable
+    padding="none"
+    @click="goToDetail"
+  >
+    <div class="product-image-container">
+      <img
+        :src="
+          product.images[0]?.url ||
+          'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=800&q=80'
+        "
+        :alt="product.name"
+        class="product-image"
+      />
+      <div
+        v-if="product.is_featured || product.stock === 0 || hasDiscount"
+        class="product-badges"
+      >
+        <VBadge v-if="product.is_featured" variant="info" size="sm"
+          >推荐</VBadge
+        >
+        <VBadge v-if="product.stock === 0" variant="error" size="sm"
+          >售罄</VBadge
+        >
+        <VBadge v-if="hasDiscount" variant="warning" size="sm">特惠</VBadge>
+      </div>
     </div>
 
-    <div class="product-info">
+    <div class="product-content">
       <h3 class="product-name">{{ product.name }}</h3>
-      <p class="product-description">{{ product.short_description }}</p>
+      <p v-if="product.short_description" class="product-description">
+        {{ product.short_description }}
+      </p>
 
       <div class="product-footer">
         <div class="product-price">
@@ -18,116 +43,112 @@
           </span>
         </div>
 
-        <button 
-          class="btn btn-primary btn-sm" 
+        <VButton
+          variant="primary"
+          size="sm"
+          :loading="loading"
+          :disabled="product.stock === 0"
           @click.stop="addToCart"
-          :disabled="product.stock === 0 || loading"
         >
-          {{ product.stock === 0 ? '售罄' : '加入购物车' }}
-        </button>
+          {{ product.stock === 0 ? "售罄" : "加入" }}
+        </VButton>
       </div>
     </div>
-  </div>
+  </VCard>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useCartStore } from '@/stores/cart'
-import { useNotification } from '@/composables/useNotification'
-import { formatPrice } from '@/utils/format'
+import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
+import { useCartStore } from "@/stores/cart";
+import { useNotification } from "@/composables/useNotification";
+import { formatPrice } from "@/utils/format";
+import { VButton, VBadge, VCard } from "@/components/ui";
 
 const props = defineProps({
   product: {
     type: Object,
-    required: true
-  }
-})
+    required: true,
+  },
+});
 
-const router = useRouter()
-const cartStore = useCartStore()
-const notification = useNotification()
-const loading = ref(false)
+const router = useRouter();
+const cartStore = useCartStore();
+const notification = useNotification();
+const loading = ref(false);
+
+const hasDiscount = computed(() => {
+  return (
+    props.product.original_price &&
+    props.product.original_price > props.product.price
+  );
+});
 
 const goToDetail = () => {
-  router.push(`/products/${props.product.id}`)
-}
+  router.push(`/products/${props.product.id}`);
+};
 
 const addToCart = async () => {
-  loading.value = true
-  const result = await cartStore.addToCart(props.product.id)
-  loading.value = false
-  
+  loading.value = true;
+  const result = await cartStore.addToCart(props.product.id);
+  loading.value = false;
+
   if (result.success) {
-    notification.success('已加入购物车！')
+    notification.success("已加入购物车");
   } else {
-    notification.error(result.message || '添加失败')
+    notification.error(result.message || "添加失败");
   }
-}
+};
 </script>
 
 <style scoped>
-.product-card {
-  cursor: pointer;
-  overflow: hidden;
+.luxury-product-card {
+  height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+.product-image-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3/4;
+  overflow: hidden;
+  background-color: var(--color-bg-secondary);
 }
 
 .product-image {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1;
-  overflow: hidden;
-  background: var(--color-bg-tertiary);
-}
-
-.product-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform var(--transition-base);
+  transition: transform var(--duration-slower) var(--ease-elegant);
 }
 
-.product-card:hover .product-image img {
-  transform: scale(1.05);
+.luxury-product-card:hover .product-image {
+  transform: scale(1.03);
 }
 
-.badge-featured {
+.product-badges {
   position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.badge-out-of-stock {
-  position: absolute;
-  top: 0.75rem;
-  left: 0.75rem;
-  background: var(--color-error);
-  color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.product-info {
-  padding: 1rem;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: var(--spacing-xs);
+  align-items: flex-end;
+}
+
+.product-content {
+  padding: var(--spacing-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
   flex: 1;
 }
 
 .product-name {
-  font-size: 1.125rem;
-  font-weight: 600;
+  font-family: var(--font-family-heading);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-regular);
   color: var(--color-text-primary);
   margin: 0;
   overflow: hidden;
@@ -136,44 +157,50 @@ const addToCart = async () => {
 }
 
 .product-description {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  line-clamp: 2;
   margin: 0;
+  min-height: 2.8em;
 }
 
 .product-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--spacing-md);
   margin-top: auto;
-  padding-top: 0.5rem;
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-border-light);
 }
 
 .product-price {
   display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .price-current {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--color-primary);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-ebony);
 }
 
 .price-original {
-  font-size: 0.875rem;
+  font-size: var(--font-size-xs);
   color: var(--color-text-muted);
   text-decoration: line-through;
 }
 
-.btn-sm {
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
+@media (max-width: 768px) {
+  .product-content {
+    padding: var(--spacing-md);
+  }
 }
 </style>

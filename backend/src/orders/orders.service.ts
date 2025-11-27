@@ -16,6 +16,9 @@ export class OrdersService {
       createOrderDto;
 
     // 1. 验证所有产品并计算总价
+
+
+    // 1. 验证所有产品并计算总价
     let totalAmount = 0;
     const productSnapshots = [];
 

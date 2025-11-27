@@ -132,15 +132,39 @@ export class AuthService {
 
       console.log('Auth successful, user ID:', authData.user.id);
 
-      const { data: profile, error: profileError } = await this.supabaseService
+      // 获取或创建用户profile
+      let { data: profile, error: profileError } = await this.supabaseService
         .getAdminClient()
         .from('user_profiles')
         .select('*')
         .eq('id', authData.user.id)
-        .single();
+        .maybeSingle();
 
-      if (profileError) {
-        console.error('Profile fetch error:', profileError);
+      if (profileError || !profile) {
+        console.log('Profile not found, creating one...');
+        
+        // 如果profile不存在，创建一个
+        const { error: insertError } = await this.supabaseService
+          .getAdminClient()
+          .from('user_profiles')
+          .insert({
+            id: authData.user.id,
+            email: authData.user.email,
+          });
+
+        if (insertError && insertError.code !== '23505') { // 忽略重复键错误
+          console.error('Profile creation error:', insertError);
+        }
+
+        // 重新获取
+        const { data: newProfile } = await this.supabaseService
+          .getAdminClient()
+          .from('user_profiles')
+          .select('*')
+          .eq('id', authData.user.id)
+          .single();
+        
+        profile = newProfile;
       }
 
       const payload = { sub: authData.user.id, email: authData.user.email };
@@ -237,11 +261,50 @@ export class AuthService {
         // 已有用户
         userId = existingProfile.id;
         userProfile = existingProfile;
-        console.log('Existing user found:', userId);
+        console.log('Existing profile found:', userId);
       } else {
-        // 新用户，创建
-        userId = this.generateUUID();
+        // 新用户，需要在 Supabase Auth 中创建用户以获取有效的 ID
+        console.log('Creating new user in Supabase Auth...');
+        
+        // 1. 尝试在 Supabase Auth 中创建用户
+        // 注意：我们需要使用 admin client 来创建用户，因为我们没有密码
+        const { data: authUser, error: createError } = await this.supabaseService
+          .getAdminClient()
+          .auth.admin.createUser({
+            phone: phone,
+            phone_confirm: true, // 自动确认为已验证
+            email_confirm: true,
+            user_metadata: { phone_login: true }
+          });
 
+        if (createError) {
+          console.error('Supabase Auth creation error:', createError);
+          // 如果用户已存在（可能之前创建过但没有 profile），尝试获取
+          if (createError.message.includes('already has been registered')) {
+             // 尝试通过 listUsers 获取 ID (Supabase admin API 没有直接 getByPhone)
+             // 或者尝试通过 generateUUID 作为 fallback (但这会再次导致 FK 错误)
+             // 正确做法是应该能获取到。
+             // 这里我们假设如果已注册，可能是之前的脏数据，或者我们需要通过 listUsers 查找
+             // 简单起见，如果已存在，我们可能无法直接获取 ID 除非我们遍历。
+             // 但通常 createUser 会失败。
+             // 让我们尝试 listUsers
+             const { data: users } = await this.supabaseService.getAdminClient().auth.admin.listUsers();
+             const foundUser = users.users.find(u => u.phone === phone);
+             if (foundUser) {
+               userId = foundUser.id;
+               console.log('Found existing Supabase Auth user:', userId);
+             } else {
+               throw new UnauthorizedException('用户状态异常，请联系客服');
+             }
+          } else {
+             throw new UnauthorizedException('创建账户失败');
+          }
+        } else {
+          userId = authUser.user.id;
+          console.log('Created new Supabase Auth user:', userId);
+        }
+
+        // 2. 创建 user_profile
         const { error: profileError } = await this.supabaseService
           .getAdminClient()
           .from('user_profiles')
@@ -253,19 +316,30 @@ export class AuthService {
 
         if (profileError) {
           console.error('Profile creation error:', profileError);
-          throw new UnauthorizedException('创建用户失败');
+          // 如果 profile 已存在（可能并发），尝试获取
+          if (profileError.code === '23505') {
+             const { data: existing } = await this.supabaseService
+              .getAdminClient()
+              .from('user_profiles')
+              .select('*')
+              .eq('id', userId)
+              .single();
+             userProfile = existing;
+          } else {
+             throw new UnauthorizedException('创建用户资料失败');
+          }
+        } else {
+          // 重新获取
+          const { data: newProfile } = await this.supabaseService
+            .getAdminClient()
+            .from('user_profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
+          userProfile = newProfile;
         }
-
-        // 重新获取
-        const { data: newProfile } = await this.supabaseService
-          .getAdminClient()
-          .from('user_profiles')
-          .select('*')
-          .eq('id', userId)
-          .single();
-
-        userProfile = newProfile;
-        console.log('New user created:', userId);
+        
+        console.log('User profile ready:', userId);
       }
 
       // 3. 生成JWT
