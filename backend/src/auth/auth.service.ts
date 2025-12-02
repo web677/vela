@@ -40,7 +40,7 @@ export class AuthService {
 
     try {
       const { data: authData, error: authError } = await this.supabaseService
-        .getClient()
+        .getAdminClient()
         .auth.signUp({
           email,
           password,
@@ -114,7 +114,7 @@ export class AuthService {
 
     try {
       const { data: authData, error: authError } = await this.supabaseService
-        .getClient()
+        .getAdminClient()
         .auth.signInWithPassword({
           email,
           password,
@@ -208,7 +208,7 @@ export class AuthService {
   async sendPhoneOtp(phone: string): Promise<{ success: boolean; message?: string }> {
     try {
       const { error } = await this.supabaseService
-        .getClient()
+        .getAdminClient()
         .auth.signInWithOtp({ phone });
 
       if (error) {

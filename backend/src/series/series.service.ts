@@ -7,7 +7,7 @@ export class SeriesService {
   constructor(private supabase: SupabaseService) {}
 
   async findAll(includeInactive = false, gender?: string) {
-    let query = this.supabase.getClient()
+    let query = this.supabase.getAdminClient()
       .from('product_series')
       .select('*')
       .order('sort_order', { ascending: true });
@@ -31,7 +31,7 @@ export class SeriesService {
   }
 
   async findBySlug(slug: string) {
-    const { data, error } = await this.supabase.getClient()
+    const { data, error } = await this.supabase.getAdminClient()
       .from('product_series')
       .select('*')
       .eq('slug', slug)
@@ -45,7 +45,7 @@ export class SeriesService {
   }
 
   async findById(id: string) {
-    const { data, error } = await this.supabase.getClient()
+    const { data, error } = await this.supabase.getAdminClient()
       .from('product_series')
       .select('*')
       .eq('id', id)
@@ -61,7 +61,7 @@ export class SeriesService {
   async getSeriesProducts(seriesId: string, page = 1, limit = 20) {
     const offset = (page - 1) * limit;
 
-    const { data, error, count } = await this.supabase.getClient()
+    const { data, error, count } = await this.supabase.getAdminClient()
       .from('products')
       .select('*', { count: 'exact' })
       .eq('series_id', seriesId)

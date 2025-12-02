@@ -35,13 +35,24 @@
           </div>
         </div>
 
-        <VButton
-          v-if="order.status === 'pending'"
-          variant="secondary"
-          @click="cancelOrder"
-        >
-          取消订单
-        </VButton>
+        <div class="header-actions">
+          <VButton
+            v-if="
+              order.status === 'pending' || order.status === 'pending_payment'
+            "
+            variant="primary"
+            @click="handlePayOrder"
+          >
+            立即支付
+          </VButton>
+          <VButton
+            v-if="order.status === 'pending'"
+            variant="secondary"
+            @click="cancelOrder"
+          >
+            取消订单
+          </VButton>
+        </div>
       </VCard>
 
       <!-- 订单商品 -->
@@ -130,17 +141,25 @@
         返回订单列表
       </VButton>
     </div>
+
+    <!-- 支付弹窗 -->
+    <PaymentModal
+      ref="paymentModalRef"
+      :order="order"
+      @success="handlePaymentSuccess"
+    />
   </div>
 </template>
 
 <script setup>
-import { onMounted, computed } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useOrderStore } from "@/stores/order";
 import { useNotification } from "@/composables/useNotification";
 import { useConfirm } from "@/composables/useConfirm";
 import { formatPrice, formatDate, getOrderStatusText } from "@/utils/format";
 import { VButton, VCard, VBadge } from "@/components/ui";
+import PaymentModal from "@/components/payment/PaymentModal.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -149,6 +168,7 @@ const notification = useNotification();
 const confirm = useConfirm();
 
 const order = computed(() => orderStore.currentOrder);
+const paymentModalRef = ref(null);
 
 onMounted(() => {
   const orderId = route.params.id;
@@ -187,6 +207,14 @@ const cancelOrder = async () => {
       notification.error(result.message || "取消失败");
     }
   }
+};
+
+const handlePayOrder = () => {
+  paymentModalRef.value?.open();
+};
+
+const handlePaymentSuccess = () => {
+  router.push(`/orders/${order.value.id}/success`);
 };
 </script>
 

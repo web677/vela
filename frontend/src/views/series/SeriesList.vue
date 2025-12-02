@@ -49,7 +49,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "@/stores/user";
 import { VButton, VCard } from "@/components/ui";
@@ -66,7 +66,7 @@ const goToSeries = (seriesId) => {
   router.push(`/series/${seriesId}`);
 };
 
-onMounted(async () => {
+const loadSeries = async () => {
   loading.value = true;
   try {
     const response = await apiClient.get("/series", {
@@ -79,6 +79,15 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
+};
+
+// Watch gender changes and reload series
+watch(userGender, () => {
+  loadSeries();
+});
+
+onMounted(async () => {
+  await loadSeries();
 });
 </script>
 
@@ -153,6 +162,7 @@ onMounted(async () => {
   line-height: var(--line-height-relaxed);
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

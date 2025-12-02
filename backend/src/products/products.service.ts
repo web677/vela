@@ -10,8 +10,12 @@ export class ProductsService {
   async findAll(query: QueryProductDto) {
     const { category, search, page = 1, limit = 20, sort = 'created_at', order = 'desc', gender } = query;
     
+    // When filtering by gender, we need to fetch more items
+    // Start with 5x the limit to have a good buffer
+    const fetchLimit = gender ? Math.max(limit * 5, 50) : limit;
+    
     let queryBuilder = this.supabaseService
-      .getClient()
+      .getAdminClient()
       .from('products')
       .select(`
         *, 
@@ -33,9 +37,9 @@ export class ProductsService {
     // 排序
     queryBuilder = queryBuilder.order(sort, { ascending: order === 'asc' });
 
-    // 分页
+    // 分页 - 使用调整后的limit
     const from = (page - 1) * limit;
-    const to = from + limit - 1;
+    const to = from + fetchLimit - 1;
     queryBuilder = queryBuilder.range(from, to);
 
     const { data, error, count } = await queryBuilder;
@@ -44,8 +48,8 @@ export class ProductsService {
       throw new Error(error.message);
     }
 
-    // 前端过滤：根据性别筛选（因为Supabase不支持关联表的OR条件）
-    let filteredData = data;
+    // 性别过滤：根据性别筛选（因为Supabase不支持关联表的OR条件）
+    let filteredData = data || [];
     if (gender && data) {
       filteredData = data.filter(product => {
         const seriesMatch = !product.series || 
@@ -56,20 +60,27 @@ export class ProductsService {
                             product.category.target_gender === gender;
         return seriesMatch && categoryMatch;
       });
+      
+      // 只返回请求的limit数量
+      filteredData = filteredData.slice(0, limit);
     }
+
+    // 计算总页数（基于过滤后的结果）
+    const totalFiltered = filteredData.length;
+    const totalPages = Math.ceil(totalFiltered / limit);
 
     return {
       data: filteredData,
-      total: filteredData?.length || 0,
+      total: totalFiltered,
       page,
       limit,
-      totalPages: Math.ceil((filteredData?.length || 0) / limit),
+      totalPages: totalPages > 0 ? totalPages : 1,
     };
   }
 
   async findOne(id: string) {
     const { data, error } = await this.supabaseService
-      .getClient()
+      .getAdminClient()
       .from('products')
       .select('*, category:categories(id, name)')
       .eq('id', id)

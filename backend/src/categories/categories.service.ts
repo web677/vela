@@ -8,7 +8,7 @@ export class CategoriesService {
 
   async findAll(gender?: string) {
     let query = this.supabaseService
-      .getClient()
+      .getAdminClient()
       .from('categories')
       .select('*')
       .eq('is_active', true)
@@ -30,7 +30,7 @@ export class CategoriesService {
 
   async findOne(id: string) {
     const { data, error } = await this.supabaseService
-      .getClient()
+      .getAdminClient()
       .from('categories')
       .select('*')
       .eq('id', id)

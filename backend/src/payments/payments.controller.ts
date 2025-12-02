@@ -1,29 +1,98 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, Headers, RawBodyRequest, Req, UseGuards } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
+import { CreateChargeDto } from './dto/create-charge.dto';
+import { CreateRefundDto } from './dto/create-refund.dto';
+import { Request } from 'express';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('payments')
 export class PaymentsController {
-  constructor(private paymentsService: PaymentsService) {}
+  constructor(private readonly paymentsService: PaymentsService) {}
 
+  /**
+   * 创建支付订单
+   * POST /api/payments/create
+   */
   @Post('create')
-  createPayment(
-    @Body() body: { order_id: string; payment_method: string },
+  @UseGuards(JwtAuthGuard)
+  async createCharge(
+    @Body() createChargeDto: CreateChargeDto,
+    @Req() req: any,
   ) {
-    return this.paymentsService.createPayment(
-      body.order_id,
-      body.payment_method,
-    );
+    // 从请求中获取用户ID
+    const userId = req.user?.id;
+    if (!userId) {
+      return { success: false, message: 'Unauthorized' };
+    }
+
+    // 获取客户端IP
+    const clientIp = req.ip || req.connection.remoteAddress;
+    createChargeDto.clientIp = clientIp;
+
+    const result = await this.paymentsService.createCharge(createChargeDto, userId);
+    return {
+      success: true,
+      data: result,
+    };
   }
 
-  @Post('callback')
-  handleCallback(
-    @Body()
-    body: { order_id: string; status: string; transaction_id: string },
+  /**
+   * Webhook回调接口
+   * POST /api/payments/webhook
+   */
+  @Post('webhook')
+  async handleWebhook(
+    @Req() req: RawBodyRequest<Request>,
+    @Headers('x-pingplusplus-signature') signature: string,
   ) {
-    return this.paymentsService.handleCallback(
-      body.order_id,
-      body.status,
-      body.transaction_id,
-    );
+    // 获取原始请求体
+    const rawBody = req.rawBody?.toString('utf8') || JSON.stringify(req.body);
+    
+    const result = await this.paymentsService.handlePaymentWebhook(rawBody, signature);
+    return result;
+  }
+
+  /**
+   * 查询支付状态
+   * GET /api/payments/verify/:orderId
+   */
+  @Get('verify/:orderId')
+  @UseGuards(JwtAuthGuard)
+  async verifyPayment(
+    @Param('orderId') orderId: string,
+    @Req() req: any,
+  ) {
+    const userId = req.user?.id;
+    if (!userId) {
+      return { success: false, message: 'Unauthorized' };
+    }
+
+    const result = await this.paymentsService.verifyPayment(orderId, userId);
+    return {
+      success: true,
+      data: result,
+    };
+  }
+
+  /**
+   * 创建退款
+   * POST /api/refunds/create
+   */
+  @Post('/refunds/create')
+  @UseGuards(JwtAuthGuard)
+  async createRefund(
+    @Body() createRefundDto: CreateRefundDto,
+    @Req() req: any,
+  ) {
+    const userId = req.user?.id;
+    if (!userId) {
+      return { success: false, message: 'Unauthorized' };
+    }
+
+    const result = await this.paymentsService.createRefund(createRefundDto, userId);
+    return {
+      success: true,
+      data: result,
+    };
   }
 }

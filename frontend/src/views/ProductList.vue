@@ -86,7 +86,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useProductStore } from "@/stores/product";
 import { useUserStore } from "@/stores/user";
@@ -126,7 +126,7 @@ const loadProducts = async () => {
     limit: 20,
     sort: sortBy.value,
     order: sortOrder.value,
-    gender: userGender.value, // 添加性别参数
+    gender: userGender.value,
   };
 
   if (selectedCategory.value) {
@@ -160,6 +160,12 @@ const changePage = (page) => {
   loadProducts();
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
+
+// Watch gender changes and reload products
+watch(userGender, () => {
+  currentPage.value = 1; // Reset to first page
+  loadProducts();
+});
 </script>
 
 <style scoped>

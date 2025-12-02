@@ -79,36 +79,6 @@
           </div>
         </VCard>
 
-        <!-- 支付方式 -->
-        <VCard class="form-section" padding="xl">
-          <h3 class="section-title">支付方式</h3>
-
-          <div class="payment-options">
-            <label class="payment-option">
-              <input
-                v-model="form.payment_method"
-                type="radio"
-                value="alipay"
-              />
-              <span class="payment-label">
-                <span class="payment-icon">💳</span>
-                <span>支付宝</span>
-              </span>
-            </label>
-            <label class="payment-option">
-              <input
-                v-model="form.payment_method"
-                type="radio"
-                value="wechat"
-              />
-              <span class="payment-label">
-                <span class="payment-icon">💚</span>
-                <span>微信支付</span>
-              </span>
-            </label>
-          </div>
-        </VCard>
-
         <!-- 订单备注 -->
         <VCard class="form-section" padding="xl">
           <h3 class="section-title">订单备注</h3>
@@ -165,6 +135,14 @@
         </VCard>
       </div>
     </div>
+
+    <!-- 支付弹窗 -->
+    <PaymentModal
+      ref="paymentModalRef"
+      :order="createdOrder"
+      @success="handlePaymentSuccess"
+      @cancel="handlePaymentCancel"
+    />
   </div>
 </template>
 
@@ -178,6 +156,7 @@ import { useNotification } from "@/composables/useNotification";
 import { validateOrderForm } from "@/utils/formValidation";
 import { formatPrice } from "@/utils/format";
 import { VButton, VCard, VInput, VSelect } from "@/components/ui";
+import PaymentModal from "@/components/payment/PaymentModal.vue";
 import { chinaAreaData } from "@/utils/china-area-data";
 
 const router = useRouter();
@@ -187,6 +166,8 @@ const userStore = useUserStore();
 const notification = useNotification();
 
 const submitting = ref(false);
+const paymentModalRef = ref(null);
+const createdOrder = ref(null);
 
 const form = ref({
   shipping_address: {
@@ -301,12 +282,23 @@ const submitOrder = async () => {
   if (result.success) {
     notification.success("订单创建成功！");
     // 订单创建成功后，清空本地购物车状态
-    // 后端已经清空了数据库中的购物车，这里只需同步前端状态
     await cartStore.fetchCart();
-    router.push(`/orders/${result.data.id}`);
+
+    // 保存订单数据并打开支付弹窗
+    createdOrder.value = result.data;
+    paymentModalRef.value?.open();
   } else {
     notification.error(result.message || "订单创建失败");
   }
+};
+
+const handlePaymentSuccess = () => {
+  router.push(`/orders/${createdOrder.value.id}/success`);
+};
+
+const handlePaymentCancel = () => {
+  // 支付取消，跳转到订单详情页
+  router.push(`/orders/${createdOrder.value.id}`);
 };
 </script>
 

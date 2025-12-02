@@ -125,7 +125,7 @@ const updateQty = async (item, newQty) => {
 };
 
 const removeItem = async (itemId) => {
-  const result = await cartStore.removeFromCart(itemId);
+  const result = await cartStore.removeCartItem(itemId);
   if (result.success) {
     notification.success("已删除");
   }
