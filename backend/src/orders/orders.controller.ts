@@ -8,6 +8,7 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
+import { LogisticsService } from '../logistics/logistics.service';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { QueryOrderDto } from './dto/query-order.dto';
@@ -15,7 +16,10 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('orders')
 export class OrdersController {
-  constructor(private ordersService: OrdersService) {}
+  constructor(
+    private ordersService: OrdersService,
+    private logisticsService: LogisticsService,
+  ) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -39,5 +43,11 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard)
   cancel(@Req() req, @Param('id') id: string) {
     return this.ordersService.cancel(req.user.id, id);
+  }
+
+  @Get(':id/logistics')
+  @UseGuards(JwtAuthGuard)
+  async getLogistics(@Req() req, @Param('id') id: string) {
+    return this.ordersService.getLogistics(req.user.id, id);
   }
 }

@@ -20,4 +20,9 @@ export const orderAPI = {
   cancelOrder(id) {
     return apiClient.post(`/orders/${id}/cancel`)
   },
+
+  // 获取订单物流信息
+  getOrderLogistics(id) {
+    return apiClient.get(`/orders/${id}/logistics`)
+  },
 }

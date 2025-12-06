@@ -65,7 +65,9 @@
               :alt="item.product_snapshot.name"
             />
             <div class="item-info">
-              <p class="item-name">{{ item.product_snapshot.name }}</p>
+              <p class="item-name">
+                {{ item.product_snapshot.name }}
+              </p>
               <p class="item-specs" v-if="item.product_snapshot.specifications">
                 {{
                   Object.values(item.product_snapshot.specifications).join(
@@ -76,8 +78,12 @@
               <p class="item-quantity">x{{ item.quantity }}</p>
             </div>
             <div class="item-price">
-              <p class="unit-price">{{ formatPrice(item.price) }}</p>
-              <p class="subtotal">{{ formatPrice(item.subtotal) }}</p>
+              <p class="unit-price">
+                {{ formatPrice(item.price) }}
+              </p>
+              <p class="subtotal">
+                {{ formatPrice(item.subtotal) }}
+              </p>
             </div>
           </div>
         </div>
@@ -107,23 +113,14 @@
         </div>
       </VCard>
 
-      <!-- 联系信息 -->
-      <VCard class="contact-info" padding="xl">
-        <h3 class="section-title">联系信息</h3>
-        <div class="info-grid">
-          <div class="info-item">
-            <span class="label">联系人</span>
-            <span class="value">{{ order.contact_info.name }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">联系电话</span>
-            <span class="value">{{ order.contact_info.phone }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">电子邮箱</span>
-            <span class="value">{{ order.contact_info.email }}</span>
-          </div>
-        </div>
+      <!-- 物流跟踪 -->
+      <VCard
+        v-if="order.tracking_number"
+        class="logistics-tracking-section"
+        padding="xl"
+      >
+        <h3 class="section-title">物流跟踪</h3>
+        <LogisticsTracking :order-id="order.id" />
       </VCard>
 
       <!-- 备注 -->
@@ -160,6 +157,7 @@ import { useConfirm } from "@/composables/useConfirm";
 import { formatPrice, formatDate, getOrderStatusText } from "@/utils/format";
 import { VButton, VCard, VBadge } from "@/components/ui";
 import PaymentModal from "@/components/payment/PaymentModal.vue";
+import LogisticsTracking from "@/components/order/LogisticsTracking.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -179,7 +177,8 @@ const getStatusVariant = (status) => {
   const statusMap = {
     pending: "warning",
     paid: "info",
-    shipped: "info",
+    pending_shipment: "info",
+    shipped: "success",
     delivered: "success",
     cancelled: "error",
     refunded: "error",

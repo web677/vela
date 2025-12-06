@@ -9,6 +9,7 @@ import { CartModule } from './cart/cart.module';
 import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
 import { SeriesModule } from './series/series.module';
+import { LogisticsModule } from './logistics/logistics.module';
 import { DatabaseModule } from './database/database.module';
 import { RedisModule } from './redis/redis.module';
 
@@ -29,6 +30,7 @@ import { RedisModule } from './redis/redis.module';
     OrdersModule,
     PaymentsModule,
     SeriesModule,
+    LogisticsModule,
   ],
 })
 export class AppModule {}

@@ -4,12 +4,16 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { SupabaseService } from '../database/supabase.service';
+import { LogisticsService } from '../logistics/logistics.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { QueryOrderDto } from './dto/query-order.dto';
 
 @Injectable()
 export class OrdersService {
-  constructor(private supabaseService: SupabaseService) {}
+  constructor(
+    private supabaseService: SupabaseService,
+    private logisticsService: LogisticsService,
+  ) {}
 
   async create(userId: string | null, createOrderDto: CreateOrderDto) {
     const { items, shipping_address, contact_info, payment_method, notes } =
@@ -77,6 +81,7 @@ export class OrdersService {
       contact_info,
       payment_method: payment_method || 'alipay',
       payment_status: 'unpaid',
+      tracking_number: '464901901949290', // 暂时写死测试物流单号
       notes,
     };
 
@@ -273,5 +278,30 @@ export class OrdersService {
     }
 
     return data;
+  }
+
+  async getLogistics(userId: string, orderId: string) {
+    // 获取订单信息
+    const { data: order, error } = await this.supabaseService
+      .getAdminClient()
+      .from('orders')
+      .select('tracking_number')
+      .eq('id', orderId)
+      .eq('user_id', userId)
+      .single();
+
+    if (error || !order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    if (!order.tracking_number) {
+      return {
+        success: false,
+        message: '该订单暂无物流信息',
+      };
+    }
+
+    // 查询物流信息
+    return this.logisticsService.queryTracking(order.tracking_number);
   }
 }

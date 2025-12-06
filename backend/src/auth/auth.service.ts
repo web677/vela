@@ -291,20 +291,22 @@ export class AuthService {
         if (createError) {
           console.error('Supabase Auth creation error:', createError);
           // 如果用户已存在（可能之前创建过但没有 profile），尝试获取
-          if (createError.message.includes('already has been registered')) {
-             // 尝试通过 listUsers 获取 ID (Supabase admin API 没有直接 getByPhone)
-             // 或者尝试通过 generateUUID 作为 fallback (但这会再次导致 FK 错误)
-             // 正确做法是应该能获取到。
-             // 这里我们假设如果已注册，可能是之前的脏数据，或者我们需要通过 listUsers 查找
-             // 简单起见，如果已存在，我们可能无法直接获取 ID 除非我们遍历。
-             // 但通常 createUser 会失败。
-             // 让我们尝试 listUsers
-             const { data: users } = await this.supabaseService.getAdminClient().auth.admin.listUsers();
+          if (
+            createError.code === 'phone_exists' || 
+            createError.message?.includes('already registered') || 
+            createError.message?.includes('already has been registered')
+          ) {
+             // 尝试通过 listUsers 获取 ID
+             // 注意：listUsers 默认只返回 50 个用户，如果用户量大这里可能会找不到
+             // 但这是目前处理孤儿账号（有auth无profile）的唯一管理端方法
+             const { data: users } = await this.supabaseService.getAdminClient().auth.admin.listUsers({ perPage: 1000 });
              const foundUser = users.users.find(u => u.phone === phone);
+             
              if (foundUser) {
                userId = foundUser.id;
                console.log('Found existing Supabase Auth user:', userId);
              } else {
+               console.error('User exists in auth but could not be found in listUsers');
                throw new UnauthorizedException('用户状态异常，请联系客服');
              }
           } else {

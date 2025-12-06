@@ -20,8 +20,10 @@ export const getOrderStatusText = (status) => {
   const statusMap = {
     pending: '待支付',
     paid: '已支付',
+    pending_shipment: '待发货',
     processing: '处理中',
     shipped: '已发货',
+    delivered: '已签收',
     completed: '已完成',
     cancelled: '已取消',
   }
@@ -33,8 +35,10 @@ export const getOrderStatusColor = (status) => {
   const colorMap = {
     pending: '#f59e0b',
     paid: '#3b82f6',
+    pending_shipment: '#8b5cf6',
     processing: '#8b5cf6',
     shipped: '#10b981',
+    delivered: '#06b6d4',
     completed: '#06b6d4',
     cancelled: '#ef4444',
   }

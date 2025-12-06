@@ -49,6 +49,8 @@ services:
       # Aliyun Captcha
       - ALIYUN_CAPTCHA_APP_ID=${ALIYUN_CAPTCHA_APP_ID}
       - ALIYUN_CAPTCHA_APP_KEY=${ALIYUN_CAPTCHA_APP_KEY}
+      # Aliyun Logistics
+      - ALIYUN_LOGISTICS_APPCODE=${ALIYUN_LOGISTICS_APPCODE}
       # Ping++
       - PINGPP_API_KEY=${PINGPP_API_KEY}
       - PINGPP_APP_ID=${PINGPP_APP_ID}
