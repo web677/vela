@@ -8,6 +8,8 @@ import Checkout from '@/views/Checkout.vue'
 import Login from '@/views/Login.vue'
 import OrderList from '@/views/OrderList.vue'
 import OrderDetail from '@/views/OrderDetail.vue'
+import OrderSuccess from '@/views/orders/OrderSuccess.vue'
+import OrderCancel from '@/views/orders/OrderCancel.vue'
 import SeriesList from '@/views/series/SeriesList.vue'
 import SeriesDetail from '@/views/series/SeriesDetail.vue'
 import UIDemo from '@/views/UIDemo.vue'
@@ -83,6 +85,32 @@ const routes = [
     name: 'OrderDetail',
     component: OrderDetail,
     meta: { title: '订单详情', requiresAuth: true }
+  },
+  // 新的支付结果页面（使用查询参数）
+  {
+    path: '/payment/success',
+    name: 'PaymentSuccess',
+    component: () => import('@/views/payment/PaymentSuccess.vue'),
+    meta: { title: '支付处理中', requiresAuth: true }
+  },
+  {
+    path: '/payment/cancel',
+    name: 'PaymentCancel',
+    component: () => import('@/views/payment/PaymentCancel.vue'),
+    meta: { title: '支付处理中', requiresAuth: true }
+  },
+  // 保留旧的路由以兼容性（可选）
+  {
+    path: '/orders/:orderId/success',
+    name: 'OrderSuccess',
+    component: OrderSuccess,
+    meta: { title: '支付成功', requiresAuth: true }
+  },
+  {
+    path: '/orders/:orderId/cancel',
+    name: 'OrderCancel',
+    component: OrderCancel,
+    meta: { title: '支付未完成', requiresAuth: true }
   },
   // Legal Pages
   {

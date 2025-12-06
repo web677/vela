@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: vela-redis-dev
+    command: redis-server --port 6389
+    ports:
+      - "6389:6389"
+    volumes:
+      - redis-dev-data:/data
+    networks:
+      - vela-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: builder
+    container_name: vela-backend-dev
+    ports:
+      - "3580:3580"
+      - "9229:9229"  # Debug port
+    environment:
+      - NODE_ENV=development
+      - PORT=3580
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-7d}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6389
+      - REDIS_PASSWORD=
+      - ALIYUN_ACCESS_KEY_ID=${ALIYUN_ACCESS_KEY_ID}
+      - ALIYUN_ACCESS_KEY_SECRET=${ALIYUN_ACCESS_KEY_SECRET}
+      - SMS_SIGN_NAME=${SMS_SIGN_NAME}
+      - SMS_TEMPLATE_CODE=${SMS_TEMPLATE_CODE}
+      - ALIYUN_CAPTCHA_APP_ID=${ALIYUN_CAPTCHA_APP_ID}
+      - ALIYUN_CAPTCHA_APP_KEY=${ALIYUN_CAPTCHA_APP_KEY}
+      - PINGPP_API_KEY=${PINGPP_API_KEY}
+      - PINGPP_APP_ID=${PINGPP_APP_ID}
+      - PINGPP_PRIVATE_KEY_PATH=/app/src/config/pingpp_rsa_private_key.pem
+      - PINGPP_PUBLIC_KEY_PATH=/app/src/config/pingpp_rsa_public_key.pem
+      - FRONTEND_URL=http://localhost:5183
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/test:/app/test
+    command: npm run start:dev
+    depends_on:
+      - redis
+    networks:
+      - vela-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: builder
+    container_name: vela-frontend-dev
+    ports:
+      - "5183:5183"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:3580/api
+      - VITE_PINGPP_API_KEY=${VITE_PINGPP_API_KEY}
+      - VITE_ALIYUN_CAPTCHA_APP_ID=${VITE_ALIYUN_CAPTCHA_APP_ID}
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    command: npm run dev -- --host
+    depends_on:
+      - backend
+    networks:
+      - vela-network
+
+networks:
+  vela-network:
+    driver: bridge
+
+volumes:
+  redis-dev-data:
+    driver: local

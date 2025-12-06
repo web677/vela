@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # Nginx Proxy Manager - 域名转发与 SSL 管理
+  npm:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: vela-npm
+    restart: unless-stopped
+    ports:
+      - '80:80'   # HTTP
+      - '443:443' # HTTPS
+      - '81:81'   # 管理后台
+    volumes:
+      - ./npm/data:/data
+      - ./npm/letsencrypt:/etc/letsencrypt
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:81"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Portainer - Docker 图形化管理
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: vela-portainer
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - '9000:9000'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./portainer_data:/data
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:9000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  default:
+    name: vela-network

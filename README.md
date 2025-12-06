@@ -1,190 +1,124 @@
 # Vela 电商平台
 
-完整的全栈电商解决方案，基于 Vue 3 + NestJS + Supabase。
+基于 Vue 3 + NestJS + Supabase 的全栈电商解决方案。
 
-## 📖 项目文档
+## 📖 文档导航
 
-- [系统架构设计](/.gemini/antigravity/brain/7f6499e6-5886-4621-b0b3-eac567ab10de/vela-architecture.md)
-- [数据库 SQL](/.gemini/antigravity/brain/7f6499e6-5886-4621-b0b3-eac567ab10de/supabase-schema.sql)
-- [后端实现总结](/.gemini/antigravity/brain/7f6499e6-5886-4621-b0b3-eac567ab10de/backend-summary.md)
-- [前端骨架总结](/.gemini/antigravity/brain/7f6499e6-5886-4621-b0b3-eac567ab10de/frontend-skeleton-summary.md)
-- [页面实现总结](/.gemini/antigravity/brain/7f6499e6-5886-4621-b0b3-eac567ab10de/pages-implementation-summary.md)
-- **[🚀 本地运行指南](/.gemini/antigravity/brain/7f6499e6-5886-4621-b0b3-eac567ab10de/deployment-guide.md)** ← 从这里开始
+- **[🚀 快速开始](#-快速开始)** - 本地开发与部署指南
+- **[🐳 Docker 部署](DOCKER_DEPLOYMENT.md)** - 完整的容器化部署指南
+- **[🔐 环境变量配置](ENV_CONFIGURATION.md)** - 密钥与配置管理说明
+- **[🏗️ 系统架构](/.gemini/antigravity/brain/7f6499e6-5886-4621-b0b3-eac567ab10de/vela-architecture.md)** - 架构设计文档
 
 ## ✨ 功能特性
 
-### 前台功能
+### 前台商城
 
-- ✅ 产品浏览（列表、详情、搜索、过滤）
-- ✅ 购物车管理
-- ✅ 用户注册/登录
-- ✅ 订单创建（支持游客和登录用户）
-- ✅ 订单管理（查看、取消）
+- ✅ **产品浏览** - 列表、详情、搜索、过滤
+- ✅ **购物车** - 状态管理、持久化
+- ✅ **订单流程** - 创建、支付模拟、管理
+- ✅ **用户中心** - 注册、登录、个人信息
 
-### 后台功能
+### 后台服务
 
-- ✅ JWT 认证
-- ✅ 产品 CRUD
-- ✅ 库存管理
-- ✅ 订单处理
-- ✅ 支付 Mock
+- ✅ **认证授权** - JWT + Supabase Auth
+- ✅ **数据管理** - 产品、分类、订单 CRUD
+- ✅ **库存控制** - 下单扣减、并发处理
+- ✅ **安全机制** - RLS、参数校验、接口限流
 
 ## 🛠️ 技术栈
 
-### 前端
+| 领域     | 技术         | 说明              |
+| -------- | ------------ | ----------------- |
+| **前端** | Vue 3        | Composition API   |
+|          | Vite         | 构建工具          |
+|          | Pinia        | 状态管理          |
+|          | Vue Router 4 | 路由管理          |
+| **后端** | NestJS       | Node.js 框架      |
+|          | TypeScript   | 类型安全          |
+|          | Passport     | 认证策略          |
+| **数据** | Supabase     | PostgreSQL + Auth |
+|          | Redis        | 缓存与会话        |
 
-- Vue 3 (Composition API)
-- Vite
-- Pinia (状态管理)
-- Vue Router 4
-- Axios
+## 🚀 快速开始
 
-### 后端
+### 1. 环境准备
 
-- NestJS
-- TypeScript
-- Passport JWT
-- Class Validator
+- Node.js v18+
+- Docker & Docker Compose (推荐)
+- Supabase 账号
 
-### 数据库
+### 2. 配置环境变量
 
-- Supabase (PostgreSQL)
-- Supabase Auth
-- Row Level Security (RLS)
+复制模板并配置 `.env`（**不要提交到 Git**）：
+
+```bash
+cp .env.example .env
+# 编辑 .env 填入 Supabase 和其他密钥
+```
+
+### 3. 启动服务
+
+#### 方式 A: Docker Compose (推荐)
+
+一键启动所有服务（Redis, Backend, Frontend）：
+
+```bash
+docker-compose up -d
+```
+
+| 服务         | 地址                      | 容器端口 | 宿主机端口 |
+| ------------ | ------------------------- | -------- | ---------- |
+| **Frontend** | http://localhost:8088     | 80       | **8088**   |
+| **Backend**  | http://localhost:3580/api | 3580     | **3580**   |
+| **Redis**    | localhost:6389            | 6389     | **6389**   |
+
+#### 方式 B: 本地开发
+
+需要分别启动前后端：
+
+```bash
+# 1. 启动后端
+cd backend
+npm install
+npm run start:dev
+# API 地址: http://localhost:3580/api
+
+# 2. 启动前端 (新终端)
+cd frontend
+npm install
+npm run dev
+# 访问地址: http://localhost:5183
+```
 
 ## 📁 项目结构
 
 ```
 vela/
 ├── backend/              # NestJS 后端 API
-│   ├── src/
-│   │   ├── auth/         # 认证模块
-│   │   ├── users/        # 用户模块
-│   │   ├── products/     # 产品模块
-│   │   ├── categories/   # 分类模块
-│   │   ├── cart/         # 购物车模块
-│   │   ├── orders/       # 订单模块
-│   │   ├── payments/     # 支付模块
-│   │   └── database/     # 数据库模块
-│   ├── .env.example
-│   └── package.json
-│
 ├── frontend/             # Vue 3 前端应用
-│   ├── src/
-│   │   ├── api/          # API 客户端
-│   │   ├── components/   # Vue 组件
-│   │   ├── views/        # 页面视图
-│   │   ├── stores/       # Pinia 状态管理
-│   │   ├── router/       # 路由配置
-│   │   ├── utils/        # 工具函数
-│   │   └── assets/       # 静态资源
-│   ├── .env.example
-│   └── package.json
-│
-└── README.md             # 本文档
+├── docker-compose.yml    # Docker 编排配置
+├── .env                  # 环境变量 (勿提交)
+├── .env.example          # 环境变量模板
+├── DOCKER_DEPLOYMENT.md  # 部署文档
+└── ENV_CONFIGURATION.md  # 配置文档
 ```
 
-## 🚀 快速开始
-
-### 前置要求
-
-- Node.js v18+
-- npm v9+
-- Supabase 账号
-
-### 安装步骤
-
-详细步骤请查看 **[本地运行指南](/.gemini/antigravity/brain/7f6499e6-5886-4621-b0b3-eac567ab10de/deployment-guide.md)**
+## 📝 常用命令
 
 ```bash
-# 1. 克隆仓库（如果从 Git 获取）
-git clone <repository-url>
-cd vela
+# Docker 操作
+docker-compose up -d      # 启动
+docker-compose down       # 停止
+docker-compose logs -f    # 查看日志
 
-# 2. 设置 Supabase（见部署指南）
-# - 创建项目
-# - 执行 SQL 脚本
+# 后端开发
+npm run start:dev         # 启动开发服务器
+npm run build             # 构建
 
-# 3. 安装后端依赖
-cd backend
-npm install
-cp .env.example .env
-# 编辑 .env 填入 Supabase 凭证
-npm run start:dev
-
-# 4. 安装前端依赖（新终端）
-cd frontend
-npm install
-cp .env.example .env.local
-npm run dev
+# 前端开发
+npm run dev               # 启动开发服务器
+npm run build             # 构建
 ```
-
-### 访问应用
-
-- **前端**: http://localhost:5173
-- **后端 API**: http://localhost:3000/api
-
-## 📊 数据库设计
-
-### 核心表
-
-- `user_profiles` - 用户扩展信息
-- `categories` - 产品分类
-- `products` - 产品信息
-- `cart_items` - 购物车项
-- `orders` - 订单
-- `order_items` - 订单项
-
-## 🎨 UI 设计
-
-- 现代暗黑主题
-- 响应式布局（移动端友好）
-- 流畅动画效果
-- 紫色主色调 + 玻璃态设计
-
-## 📝 开发命令
-
-### 后端
-
-```bash
-npm run start:dev    # 开发模式
-npm run build        # 构建
-npm run start:prod   # 生产运行
-```
-
-### 前端
-
-```bash
-npm run dev          # 开发模式
-npm run build        # 构建
-npm run preview      # 预览构建
-```
-
-## 🔒 安全特性
-
-- JWT 认证
-- Supabase Row Level Security (RLS)
-- 密码加密（Supabase Auth）
-- CORS 配置
-- 输入验证（Class Validator）
-
-## 📖 API 文档
-
-主要 API 端点：
-
-- `POST /api/auth/register` - 用户注册
-- `POST /api/auth/login` - 用户登录
-- `GET /api/products` - 获取产品列表
-- `GET /api/products/:id` - 获取产品详情
-- `POST /api/cart` - 添加到购物车
-- `POST /api/orders` - 创建订单
-- `GET /api/orders` - 获取订单列表
-
-完整 API 文档见 [系统架构设计](/.gemini/antigravity/brain/7f6499e6-5886-4621-b0b3-eac567ab10de/vela-architecture.md)
-
-## 🐛 故障排查
-
-常见问题请参考 [部署指南的故障排查部分](/.gemini/antigravity/brain/7f6499e6-5886-4621-b0b3-eac567ab10de/deployment-guide.md#🔧-常见问题)
 
 ## 📄 许可证
 
@@ -192,5 +126,4 @@ MIT
 
 ---
 
-**开发者**: Vela Team  
-**版本**: 1.0.0
+**开发者**: Vela Team

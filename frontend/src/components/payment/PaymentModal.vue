@@ -129,31 +129,42 @@ const handlePay = async () => {
 
     const charge = data.data.charge;
 
-    // 2. 调用Ping++ SDK发起支付
-    pingpp.createPayment(charge, (result, err) => {
-      if (result === "success") {
-        // 支付成功
-        handlePaymentSuccess();
-      } else if (result === "fail") {
-        // 支付失败
-        notification.error(err.msg || "支付失败，请重试");
-        loading.value = false;
-      } else if (result === "cancel") {
-        // 用户取消支付
-        notification.warning("支付已取消");
-        loading.value = false;
-        emit("cancel");
-      }
-    });
+    // 2. 判断支付类型
+    const isRedirectPayment = [
+      "alipay_wap",
+      "alipay_pc_direct",
+      "wx_wap",
+    ].includes(selectedMethod.value);
 
-    // 对于跳转类支付，关闭弹窗
-    if (
-      selectedMethod.value === "alipay_wap" ||
-      selectedMethod.value === "alipay_pc_direct"
-    ) {
-      visible.value = false;
-      loading.value = false;
-      notification.info("支付窗口已打开，支付完成后请返回订单列表查看");
+    if (isRedirectPayment) {
+      // 跳转类支付：保存订单号，页面即将跳转
+      localStorage.setItem("pending_payment_order", props.order.order_number);
+
+      // 调用 Ping++ SDK 会立即跳转到支付宝/微信
+      pingpp.createPayment(charge, () => {
+        // 这个回调对于跳转类支付不会触发
+        // 因为页面已经跳走了
+      });
+
+      // 不关闭弹窗，不显示提示，因为页面马上就会跳走
+      // 用户在支付宝/微信完成支付后会被重定向到 success_url
+    } else {
+      // 内嵌类支付（如微信 JSAPI）：回调会触发
+      pingpp.createPayment(charge, (result, err) => {
+        if (result === "success") {
+          // 支付成功
+          handlePaymentSuccess();
+        } else if (result === "fail") {
+          // 支付失败
+          notification.error(err.msg || "支付失败，请重试");
+          loading.value = false;
+        } else if (result === "cancel") {
+          // 用户取消支付
+          notification.warning("支付已取消");
+          loading.value = false;
+          emit("cancel");
+        }
+      });
     }
   } catch (error) {
     console.error("Payment error:", error);
@@ -178,7 +189,9 @@ const handlePaymentSuccess = () => {
   visible.value = false;
   loading.value = false;
   emit("success");
-  router.push(`/orders/${props.order.id}/success`);
+
+  // 跳转到支付成功页面（使用查询参数）
+  router.push(`/payment/success?order=${props.order.order_number}`);
 };
 
 defineExpose({ open, close });

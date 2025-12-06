@@ -45,6 +45,22 @@ const checkMobile = () => {
 onMounted(() => {
   checkMobile();
   window.addEventListener("resize", checkMobile);
+
+  // 检测是否从支付页面返回
+  const pendingOrder = localStorage.getItem("pending_payment_order");
+  if (pendingOrder) {
+    // 清除标记
+    localStorage.removeItem("pending_payment_order");
+
+    // 导入router
+    import("./router").then(({ default: router }) => {
+      // 如果当前不在支付结果页面，跳转过去
+      const currentPath = router.currentRoute.value.path;
+      if (!currentPath.startsWith("/payment/")) {
+        router.push(`/payment/success?order=${pendingOrder}`);
+      }
+    });
+  }
 });
 
 onUnmounted(() => {

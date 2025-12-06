@@ -75,6 +75,21 @@ export class PaymentsController {
   }
 
   /**
+   * 通过订单号查询支付状态（用于支付回跳页面）
+   * GET /api/payments/verify-by-order/:orderNumber
+   */
+  @Get('verify-by-order/:orderNumber')
+  async verifyPaymentByOrderNumber(
+    @Param('orderNumber') orderNumber: string,
+  ) {
+    const result = await this.paymentsService.verifyPaymentByOrderNumber(orderNumber);
+    return {
+      success: true,
+      data: result,
+    };
+  }
+
+  /**
    * 创建退款
    * POST /api/refunds/create
    */

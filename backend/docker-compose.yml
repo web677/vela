@@ -8,7 +8,7 @@ services:
     container_name: vela-backend
     restart: always
     ports:
-      - "3000:3000"
+      - "3580:3580"
     environment:
       # Supabase Configuration
       SUPABASE_URL: ${SUPABASE_URL}
@@ -20,12 +20,12 @@ services:
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       
       # Server Configuration
-      PORT: 3000
+      PORT: 3580
       NODE_ENV: production
     
     # Health check
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/categories', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3580/api/categories', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"]
       interval: 30s
       timeout: 3s
       retries: 3

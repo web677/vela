@@ -14,6 +14,13 @@ export const paymentAPI = {
   verifyPayment: (orderId) => {
     return client.get(`/payments/verify/${orderId}`);
   },
+
+  /**
+   * 通过订单号查询支付状态（用于支付回跳页面）
+   */
+  verifyPaymentByOrderNumber: (orderNumber) => {
+    return client.get(`/payments/verify-by-order/${orderNumber}`);
+  },
 };
 
 export const refundAPI = {

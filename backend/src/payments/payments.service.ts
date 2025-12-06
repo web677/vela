@@ -110,7 +110,7 @@ export class PaymentsService {
         app: { id: this.appId },
         channel,
         amount,
-        client_ip: clientIp || '127.0.0.1',
+        client_ip: this.normalizeClientIp(clientIp),
         currency: 'cny',
         subject: `订单${order.order_number}`,
         body: `订单${order.order_number}支付`,
@@ -155,32 +155,44 @@ export class PaymentsService {
     }
   }
 
+  private normalizeClientIp(ip?: string): string {
+    if (!ip) return '127.0.0.1';
+    const v4 = ip.replace(/^::ffff:/, '');
+    return /^(\d{1,3}\.){3}\d{1,3}$/.test(v4) ? v4 : '127.0.0.1';
+  }
+
   /**
    * 构建不同支付渠道的extra参数
    */
   private buildChannelExtra(channel: string, order: any): any {
-    const successUrl = `${this.frontendUrl}/orders/${order.id}/success`;
-    const cancelUrl = `${this.frontendUrl}/orders/${order.id}/cancel`;
+    // Ping++ 要求：测试环境使用 127.0.0.1 而不是 localhost
+    // 将 localhost 替换为 127.0.0.1
+    let frontendUrl = this.frontendUrl;
+    if (frontendUrl.includes('localhost')) {
+      frontendUrl = frontendUrl.replace('localhost', '127.0.0.1');
+      this.logger.log(`Replaced localhost with 127.0.0.1 for Ping++ compatibility: ${frontendUrl}`);
+    }
     
-    // 开发环境（localhost）不传递URL，生产环境传递完整URL
-    // 这样开发时测试方便，部署后能正常跳转
-    const isLocalhost = this.frontendUrl.includes('localhost') || this.frontendUrl.includes('127.0.0.1');
-
+    // 使用查询参数格式，避免 URL 编码问题
+    // 使用 order_number 而不是 UUID
+    const successUrl = `${frontendUrl}/payment/success?order=${encodeURIComponent(order.order_number)}`;
+    const cancelUrl = `${frontendUrl}/payment/cancel?order=${encodeURIComponent(order.order_number)}`;
+    
+    this.logger.log(`Building channel extra for ${channel}, success_url: ${successUrl}`);
+    
     switch (channel) {
       case 'alipay_wap':
-        // 开发环境：不传URL，支付后用户手动返回
-        // 生产环境：传递success_url和cancel_url，自动跳转
-        return isLocalhost ? {} : {
+        return {
           success_url: successUrl,
-          cancel_url: cancelUrl,
+          cancel_url: cancelUrl,  // iOS 设备上可能跳转到这里
         };
       case 'alipay_pc_direct':
-        return isLocalhost ? {} : {
+        return {
           success_url: successUrl,
         };
       case 'wx_wap':
-        return isLocalhost ? {} : {
-          result_url: successUrl,
+        return {
+          result_url: successUrl,  // 微信使用 result_url
         };
       case 'wx_pub':
         // 微信公众号支付需要openid
@@ -372,6 +384,61 @@ export class PaymentsService {
     return {
       order_id: orderId,
       order_status: order.status,
+      payment_status: payment?.status || 'not_found',
+      payment,
+    };
+  }
+
+  /**
+   * 通过订单号查询支付状态（用于支付回跳页面）
+   */
+  async verifyPaymentByOrderNumber(orderNumber: string) {
+    // 1. 通过 order_number 查询订单
+    const { data: order } = await this.supabaseService
+      .getAdminClient()
+      .from('orders')
+      .select('id, order_number, total_amount, status, user_id, paid_at')
+      .eq('order_number', orderNumber)
+      .single();
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    // 2. 查询支付记录
+    const { data: payment } = await this.supabaseService
+      .getAdminClient()
+      .from('payment_logs')
+      .select('*')
+      .eq('order_id', order.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    // 3. 如果支付记录存在但状态为 pending，主动查询 Ping++
+    if (payment && payment.status === 'pending') {
+      try {
+        const charge = await this.pingpp.charges.retrieve(payment.charge_id);
+        
+        // 如果支付宝/微信已经支付成功，但 webhook 未触发，手动更新状态
+        if (charge.paid) {
+          this.logger.log(`Payment succeeded for charge ${charge.id}, updating order status`);
+          await this.handleChargeSucceeded(charge);
+          
+          // 递归查询更新后的状态
+          return this.verifyPaymentByOrderNumber(orderNumber);
+        }
+      } catch (error) {
+        this.logger.warn(`Failed to query charge status: ${error.message}`);
+      }
+    }
+
+    return {
+      order_id: order.id,
+      order_number: order.order_number,
+      order_status: order.status,
+      total_amount: order.total_amount,
+      paid_at: order.paid_at,
       payment_status: payment?.status || 'not_found',
       payment,
     };

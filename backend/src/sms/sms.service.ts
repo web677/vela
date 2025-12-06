@@ -47,7 +47,10 @@ export class SmsService {
         templateParam: JSON.stringify({ code }),
       });
 
-      const runtime = new $Util.RuntimeOptions({});
+      const runtime = new $Util.RuntimeOptions({
+        connectTimeout: 10000,
+        readTimeout: 10000,
+      });
       const response = await this.client.sendSmsWithOptions(
         sendSmsRequest,
         runtime,
@@ -65,7 +68,12 @@ export class SmsService {
         return false;
       }
     } catch (error) {
-      this.logger.error(`Error sending SMS: ${error.message}`, error.stack);
+      const msg = error?.message || '';
+      if (msg.includes('ReadTimeout') || msg.includes('RequestTimeoutError')) {
+        this.logger.warn(`SMS request timeout, treating as submitted: ${msg}`);
+        return true;
+      }
+      this.logger.error(`Error sending SMS: ${msg}`, error.stack);
       throw error;
     }
   }

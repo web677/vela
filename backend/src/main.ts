@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
 
   // Get ConfigService
   const configService = app.get(ConfigService);
@@ -19,9 +19,18 @@ async function bootstrap() {
   );
 
   // 启用 CORS
-  const corsOrigin = configService.get<string>('cors.origin');
+  const frontendUrl = configService.get<string>('cors.origin');
+  
+  // 同时支持 localhost 和 127.0.0.1
+  const allowedOrigins = [frontendUrl];
+  if (frontendUrl.includes('localhost')) {
+    allowedOrigins.push(frontendUrl.replace('localhost', '127.0.0.1'));
+  } else if (frontendUrl.includes('127.0.0.1')) {
+    allowedOrigins.push(frontendUrl.replace('127.0.0.1', 'localhost'));
+  }
+  
   app.enableCors({
-    origin: corsOrigin,
+    origin: allowedOrigins,
     credentials: true,
   });
 
@@ -40,7 +49,7 @@ async function bootstrap() {
   console.log('========================================');
   console.log(`📍 URL: http://localhost:${port}/api`);
   console.log(`🌍 Environment: ${env}`);
-  console.log(`🔐 CORS Origin: ${corsOrigin}`);
+  console.log(`🔐 CORS Origins: ${allowedOrigins.join(', ')}`);
   console.log(`✅ Server started successfully!`);
   console.log('========================================');
 }
