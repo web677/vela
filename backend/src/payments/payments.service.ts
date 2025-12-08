@@ -363,7 +363,7 @@ export class PaymentsService {
     const { data: order } = await this.supabaseService
       .getAdminClient()
       .from('orders')
-      .select('user_id, status, order_number, total_amount, paid_at')
+      .select('user_id, status')
       .eq('id', orderId)
       .single();
 
@@ -382,12 +382,9 @@ export class PaymentsService {
       .single();
 
     return {
-      orderId: orderId,
-      status: order.status,
-      orderNumber: order.order_number,
-      totalAmount: Math.round(order.total_amount * 100), // Return in cents
-      paidAt: order.paid_at || payment?.paid_at,
-      paymentStatus: payment?.status || 'not_found',
+      order_id: orderId,
+      order_status: order.status,
+      payment_status: payment?.status || 'not_found',
       payment,
     };
   }

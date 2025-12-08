@@ -161,23 +161,6 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xl);
-  max-height: 500px;
-  overflow-y: auto;
-  position: relative;
-  padding-right: var(--spacing-xs);
-}
-
-.logistics-content::-webkit-scrollbar {
-  width: 6px;
-}
-
-.logistics-content::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.logistics-content::-webkit-scrollbar-thumb {
-  background-color: var(--color-border-light);
-  border-radius: 3px;
 }
 
 .logistics-header {
@@ -187,10 +170,6 @@ onMounted(() => {
   padding: var(--spacing-lg);
   background: var(--color-bg-secondary);
   border-radius: var(--radius-md);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .tracking-info,
