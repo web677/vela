@@ -30,6 +30,10 @@ api.interceptors.response.use(
     if (error.response) {
       switch (error.response.status) {
         case 401:
+          // 如果是登录接口本身的 401，不进行跳转
+          if (error.config.url.includes('/auth/login')) {
+            break;
+          }
           localStorage.removeItem('admin_token')
           message.error('登录已过期，请重新登录')
           window.location.href = '/login'

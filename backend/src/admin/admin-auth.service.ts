@@ -1,44 +1,50 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AdminAuthService {
+  private readonly logger = new Logger(AdminAuthService.name);
   private readonly adminUsername: string;
-  private readonly adminPasswordHash: string;
+  private readonly adminPasswordPlain: string;
 
   constructor(
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {
     this.adminUsername = this.configService.get('ADMIN_USERNAME') || 'admin';
-    // 默认密码 admin123 的 bcrypt hash
-    this.adminPasswordHash = this.configService.get('ADMIN_PASSWORD_HASH') || 
-      '$2b$10$rG8oZ9rZ9vZ9X9Y9Z9Z9ZOJqKpKpKpKpKpKpKpKpKpKpKpKpKpKpK';
+    // 移除默认密码，强制要求配置
+    this.adminPasswordPlain = this.configService.get('ADMIN_PASSWORD');
+    
+    this.logger.log(`Initialized AdminAuthService with username: ${this.adminUsername}`);
+    if (this.adminPasswordPlain) {
+      this.logger.log('Loaded ADMIN_PASSWORD from config');
+    } else {
+      this.logger.warn('ADMIN_PASSWORD not set in configuration. Login will be disabled.');
+    }
   }
 
   async login(username: string, password: string) {
+    this.logger.log(`Login attempt for user: ${username}`);
+    
     // 验证用户名
     if (username !== this.adminUsername) {
+      this.logger.warn(`Invalid username provided: ${username}, expected: ${this.adminUsername}`);
       throw new UnauthorizedException('用户名或密码错误');
     }
 
-    // 如果没有配置 hash，直接比较明文（开发环境）
-    const isDefaultPassword = password === 'admin123' && 
-      !this.configService.get('ADMIN_PASSWORD_HASH');
-    
-    // 验证密码
-    let isPasswordValid = isDefaultPassword;
-    if (!isDefaultPassword) {
-      try {
-        isPasswordValid = await bcrypt.compare(password, this.adminPasswordHash);
-      } catch {
-        isPasswordValid = false;
-      }
+    // 检查是否配置了密码
+    if (!this.adminPasswordPlain) {
+      this.logger.error('ADMIN_PASSWORD not configured on server');
+      throw new UnauthorizedException('服务器配置错误：未设置管理员密码');
     }
 
+    // 直接验证明文密码
+    const isPasswordValid = password === this.adminPasswordPlain;
+    this.logger.debug(`Password validation result: ${isPasswordValid}`);
+
     if (!isPasswordValid) {
+      this.logger.warn('Invalid password');
       throw new UnauthorizedException('用户名或密码错误');
     }
 

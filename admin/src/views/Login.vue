@@ -84,7 +84,11 @@ const rules = {
 
 const handleLogin = async () => {
   loading.value = true;
-
+  console.log("Login attempt:", {
+    username: formState.username,
+    passwordLen: formState.password.length,
+    password: formState.password,
+  });
   const result = await authStore.login(formState.username, formState.password);
 
   loading.value = false;

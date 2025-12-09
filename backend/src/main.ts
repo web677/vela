@@ -19,15 +19,20 @@ async function bootstrap() {
   );
 
   // 启用 CORS
-  const frontendUrl = configService.get<string>('cors.origin');
+  const frontendUrl = configService.get<string>('cors.origin'); // e.g., "http://localhost:5183,http://localhost:5174"
   
-  // 同时支持 localhost 和 127.0.0.1
-  const allowedOrigins = [frontendUrl];
-  if (frontendUrl.includes('localhost')) {
-    allowedOrigins.push(frontendUrl.replace('localhost', '127.0.0.1'));
-  } else if (frontendUrl.includes('127.0.0.1')) {
-    allowedOrigins.push(frontendUrl.replace('127.0.0.1', 'localhost'));
-  }
+  const allowedOrigins: string[] = [];
+  const urls = frontendUrl.split(',').map(url => url.trim());
+
+  urls.forEach(url => {
+    allowedOrigins.push(url);
+    // 同时支持 localhost 和 127.0.0.1
+    if (url.includes('localhost')) {
+      allowedOrigins.push(url.replace('localhost', '127.0.0.1'));
+    } else if (url.includes('127.0.0.1')) {
+      allowedOrigins.push(url.replace('127.0.0.1', 'localhost'));
+    }
+  });
   
   app.enableCors({
     origin: allowedOrigins,
