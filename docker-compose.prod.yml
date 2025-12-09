@@ -72,15 +72,15 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  frontend:
+  web:
     build:
-      context: ./frontend
+      context: ./web
       dockerfile: Dockerfile
       args:
         - VITE_API_BASE_URL=/api
         - VITE_PINGPP_API_KEY=${VITE_PINGPP_API_KEY}
         - VITE_ALIYUN_CAPTCHA_APP_ID=${VITE_ALIYUN_CAPTCHA_APP_ID}
-    container_name: vela-frontend-prod
+    container_name: vela-web-prod
     depends_on:
       backend:
         condition: service_healthy
@@ -116,7 +116,7 @@ services:
       - ./nginx/ssl:/etc/nginx/ssl:ro
       - nginx-cache:/var/cache/nginx
     depends_on:
-      - frontend
+      - web
       - backend
     restart: always
     networks:

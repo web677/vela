@@ -66,11 +66,11 @@ cp .env.example .env
 docker-compose up -d
 ```
 
-| 服务         | 地址                      | 容器端口 | 宿主机端口 |
-| ------------ | ------------------------- | -------- | ---------- |
-| **Frontend** | http://localhost:8088     | 80       | **8088**   |
-| **Backend**  | http://localhost:3580/api | 3580     | **3580**   |
-| **Redis**    | localhost:6389            | 6389     | **6389**   |
+| 服务        | 地址                      | 容器端口 | 宿主机端口 |
+| ----------- | ------------------------- | -------- | ---------- |
+| **Web**     | http://localhost:8088     | 80       | **8088**   |
+| **Backend** | http://localhost:3580/api | 3580     | **3580**   |
+| **Redis**   | localhost:6389            | 6389     | **6389**   |
 
 #### 方式 B: 本地开发
 
@@ -84,7 +84,7 @@ npm run start:dev
 # API 地址: http://localhost:3580/api
 
 # 2. 启动前端 (新终端)
-cd frontend
+cd web
 npm install
 npm run dev
 # 访问地址: http://localhost:5183
@@ -95,7 +95,8 @@ npm run dev
 ```
 vela/
 ├── backend/              # NestJS 后端 API
-├── frontend/             # Vue 3 前端应用
+├── web/                  # Vue 3 用户端网站
+├── admin/                # 管理后台 (开发中)
 ├── docker-compose.yml    # Docker 编排配置
 ├── .env                  # 环境变量 (勿提交)
 ├── .env.example          # 环境变量模板

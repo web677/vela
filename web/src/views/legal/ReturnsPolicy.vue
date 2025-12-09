@@ -8,7 +8,7 @@
         <h2>退换货条件</h2>
         <div class="content-block">
           <p>为了保障您的权益，我们提供以下退换货服务：</p>
-          
+
           <div class="highlight-box">
             <h3>可以退换货的情况</h3>
             <ul>
@@ -44,12 +44,18 @@
           </ol>
 
           <h3>第二步：等待审核</h3>
-          <p>我们会在1个工作日内审核您的申请。审核通过后，您会收到短信或邮件通知。</p>
+          <p>
+            我们会在1个工作日内审核您的申请。审核通过后，您会收到短信或邮件通知。
+          </p>
 
           <h3>第三步：寄回商品</h3>
           <ul>
-            <li><strong>质量问题：</strong>我们会安排快递上门取件，运费由我们承担</li>
-            <li><strong>7天无理由退货：</strong>需要您自行寄回商品，运费由您承担</li>
+            <li>
+              <strong>质量问题：</strong>我们会安排快递上门取件，运费由我们承担
+            </li>
+            <li>
+              <strong>7天无理由退货：</strong>需要您自行寄回商品，运费由您承担
+            </li>
             <li>请使用安全的包装，避免商品在运输过程中损坏</li>
             <li>建议使用可追踪的快递服务</li>
           </ul>
@@ -59,6 +65,10 @@
           <ul>
             <li>验收通过后，款项将在3-7个工作日内原路退回</li>
             <li>退款金额包含商品价格，不包含运费（质量问题除外）</li>
+            <li>
+              <strong>运费说明：</strong
+              >退款金额仅包含商品价格，<em>运费不予退还</em>（因商品质量问题退货的往返运费由我们承担）
+            </li>
             <li>如选择换货，我们会在验收通过后立即为您发货</li>
           </ul>
         </div>
@@ -84,7 +94,9 @@
             <div class="table-cell">3-7 个工作日</div>
           </div>
         </div>
-        <p class="note">注：退款时间从我们发起退款开始计算，具体到账时间以银行或支付平台为准。</p>
+        <p class="note">
+          注：退款时间从我们发起退款开始计算，具体到账时间以银行或支付平台为准。
+        </p>
       </section>
 
       <section class="legal-section">
@@ -92,22 +104,33 @@
         <div class="content-block">
           <div class="qa-item">
             <p class="question">Q: 收到商品后多久可以申请退换货？</p>
-            <p class="answer">A: 签收后7天内可申请退换货。超过7天恕不受理（质量问题可适当延长）。</p>
+            <p class="answer">
+              A:
+              签收后7天内可申请退换货。超过7天恕不受理（质量问题可适当延长）。
+            </p>
           </div>
 
           <div class="qa-item">
             <p class="question">Q: 退货时需要退回赠品吗？</p>
-            <p class="answer">A: 是的，如果订单中包含赠品，退货时需要一并退回，否则可能影响退款金额。</p>
+            <p class="answer">
+              A:
+              是的，如果订单中包含赠品，退货时需要一并退回，否则可能影响退款金额。
+            </p>
           </div>
 
           <div class="qa-item">
             <p class="question">Q: 可以只退部分商品吗？</p>
-            <p class="answer">A: 可以。如果订单中有多件商品，您可以选择退其中的部分商品。</p>
+            <p class="answer">
+              A: 可以。如果订单中有多件商品，您可以选择退其中的部分商品。
+            </p>
           </div>
 
           <div class="qa-item">
             <p class="question">Q: 换货需要补运费吗？</p>
-            <p class="answer">A: 如果是质量问题换货，运费由我们承担；如果是个人原因换货，往返运费需要您承担。</p>
+            <p class="answer">
+              A:
+              如果是质量问题换货，运费由我们承担；如果是个人原因换货，往返运费需要您承担。
+            </p>
           </div>
         </div>
       </section>
@@ -137,5 +160,5 @@
 </script>
 
 <style scoped>
-@import './legal-common.css';
+@import "./legal-common.css";
 </style>

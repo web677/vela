@@ -12,6 +12,8 @@ import { SeriesModule } from './series/series.module';
 import { LogisticsModule } from './logistics/logistics.module';
 import { DatabaseModule } from './database/database.module';
 import { RedisModule } from './redis/redis.module';
+import { AdminModule } from './admin/admin.module';
+import { ShippingModule } from './shipping/shipping.module';
 
 @Module({
   imports: [
@@ -31,6 +33,9 @@ import { RedisModule } from './redis/redis.module';
     PaymentsModule,
     SeriesModule,
     LogisticsModule,
+    AdminModule,
+    ShippingModule,
   ],
 })
 export class AppModule {}
+

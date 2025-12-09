@@ -116,11 +116,40 @@
 
           <div class="summary-divider"></div>
 
+          <!-- 费用明细 -->
+          <div class="fee-details">
+            <div class="fee-row">
+              <span>商品金额</span>
+              <span>{{ formatPrice(cartStore.totalAmount) }}</span>
+            </div>
+            <div class="fee-row">
+              <span>运费</span>
+              <span v-if="shippingLoading" class="shipping-loading"
+                >计算中...</span
+              >
+              <span v-else-if="!canDeliver" class="shipping-unavailable"
+                >不支持配送</span
+              >
+              <span v-else-if="shippingFee === 0" class="shipping-free"
+                >包邮</span
+              >
+              <span v-else>¥{{ shippingFee.toFixed(2) }}</span>
+            </div>
+          </div>
+
+          <!-- 包邮提示 -->
+          <div
+            v-if="freeShippingGap > 0 && canDeliver"
+            class="free-shipping-tip"
+          >
+            🚚 再购 ¥{{ freeShippingGap.toFixed(2) }} 即可享受包邮
+          </div>
+
+          <div class="summary-divider"></div>
+
           <div class="summary-total">
             <span>应付总额</span>
-            <span class="total-amount">{{
-              formatPrice(cartStore.totalAmount)
-            }}</span>
+            <span class="total-amount">{{ formatPrice(totalPayAmount) }}</span>
           </div>
 
           <VButton
@@ -128,10 +157,15 @@
             size="lg"
             block
             :loading="submitting"
+            :disabled="!canDeliver"
             @click="submitOrder"
           >
             {{ submitting ? "提交中..." : "提交订单" }}
           </VButton>
+
+          <p v-if="!canDeliver" class="delivery-warning">
+            当前地区暂不支持配送，请更换收货地址
+          </p>
         </VCard>
       </div>
     </div>
@@ -147,7 +181,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useCartStore } from "@/stores/cart";
 import { useOrderStore } from "@/stores/order";
@@ -158,6 +192,7 @@ import { formatPrice } from "@/utils/format";
 import { VButton, VCard, VInput, VSelect } from "@/components/ui";
 import PaymentModal from "@/components/payment/PaymentModal.vue";
 import { chinaAreaData } from "@/utils/china-area-data";
+import api from "@/api/client";
 
 const router = useRouter();
 const cartStore = useCartStore();
@@ -168,6 +203,12 @@ const notification = useNotification();
 const submitting = ref(false);
 const paymentModalRef = ref(null);
 const createdOrder = ref(null);
+
+// 运费相关
+const shippingFee = ref(0);
+const freeShippingGap = ref(0);
+const canDeliver = ref(true);
+const shippingLoading = ref(false);
 
 const form = ref({
   shipping_address: {
@@ -212,11 +253,67 @@ const districtOptions = computed(() => {
 const handleProvinceChange = () => {
   form.value.shipping_address.city = "";
   form.value.shipping_address.district = "";
+  // 计算运费
+  calculateShipping();
 };
 
 const handleCityChange = () => {
   form.value.shipping_address.district = "";
 };
+
+// 计算运费
+const calculateShipping = async () => {
+  const province = form.value.shipping_address.province;
+  if (!province) {
+    shippingFee.value = 0;
+    freeShippingGap.value = 0;
+    canDeliver.value = true;
+    return;
+  }
+
+  shippingLoading.value = true;
+  try {
+    const response = await api.get("/shipping/calculate", {
+      params: {
+        province,
+        amount: cartStore.totalAmount,
+      },
+    });
+    shippingFee.value = response.data.fee || 0;
+    freeShippingGap.value = response.data.gap || 0;
+    canDeliver.value = response.data.canDeliver !== false;
+  } catch (error) {
+    // 如果接口不存在，使用默认运费规则
+    const remoteAreas = ["西藏", "新疆", "内蒙古"];
+    if (remoteAreas.includes(province)) {
+      shippingFee.value = 25;
+      freeShippingGap.value = 0;
+      canDeliver.value = true;
+    } else {
+      shippingFee.value = cartStore.totalAmount >= 99 ? 0 : 10;
+      freeShippingGap.value =
+        cartStore.totalAmount >= 99 ? 0 : 99 - cartStore.totalAmount;
+      canDeliver.value = true;
+    }
+  } finally {
+    shippingLoading.value = false;
+  }
+};
+
+// 应付总额
+const totalPayAmount = computed(() => {
+  return cartStore.totalAmount + shippingFee.value;
+});
+
+// 监听购物车金额变化，重新计算运费
+watch(
+  () => cartStore.totalAmount,
+  () => {
+    if (form.value.shipping_address.province) {
+      calculateShipping();
+    }
+  }
+);
 
 onMounted(() => {
   cartStore.fetchCart();
@@ -551,6 +648,56 @@ const handlePaymentCancel = () => {
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
   color: var(--color-primary);
+}
+
+/* 运费相关样式 */
+.fee-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.fee-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.shipping-loading {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.shipping-free {
+  color: var(--color-success);
+  font-weight: var(--font-weight-semibold);
+}
+
+.shipping-unavailable {
+  color: var(--color-error);
+  font-weight: var(--font-weight-semibold);
+}
+
+.free-shipping-tip {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 100%);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: #d97706;
+  text-align: center;
+  margin-top: var(--spacing-sm);
+}
+
+.delivery-warning {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-sm);
+  background: var(--color-error-subtle);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+  text-align: center;
 }
 
 /* 移动端 */
